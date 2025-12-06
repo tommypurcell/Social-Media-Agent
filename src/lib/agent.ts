@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { AgentState, Task, Log } from './types';
-import { mockApi } from './mock-api';
+import type { AgentState, Task, Log, WorkflowConfig } from './types';
+import { api } from './api';
 
 const INITIAL_STATE: AgentState = {
     isActive: false,
@@ -26,12 +26,13 @@ export function useAgent() {
         }));
     }, []);
 
-    const addTask = useCallback((description: string, type: Task['type']) => {
+    const addTask = useCallback((description: string, type: Task['type'], metadata?: any) => {
         const newTask: Task = {
             id: Math.random().toString(36).substr(2, 9),
             type,
             status: 'pending',
-            description
+            description,
+            metadata
         };
         setState(prev => ({
             ...prev,
@@ -97,12 +98,12 @@ export function useAgent() {
 
         switch (task.type) {
             case 'check_dms':
-                const newMsgs = await mockApi.fetchMessages();
+                const newMsgs = await api.fetchMessages();
                 if (newMsgs.length > 0) {
                     addLog(`Received ${newMsgs.length} new DM(s).`, 'success');
                     setState(prev => ({ ...prev, messages: [...prev.messages, ...newMsgs] }));
                     // Auto-reply logic
-                    newMsgs.forEach(msg => {
+                    newMsgs.forEach((msg) => {
                         addTask(`Reply to ${msg.sender}: "Thanks for reaching out!"`, 'reply_dm');
                     });
                 } else {
@@ -116,25 +117,28 @@ export function useAgent() {
 
             case 'generate_media':
                 const prompt = task.description.split("'")[1] || "A cool image";
-                await mockApi.generateImage(prompt);
-                addLog(`Generated Media for: ${prompt}`, 'success');
-                addTask(`Post to Instagram: ${prompt}`, 'post_content');
-                // Store the generated image/prompt in detailed state if needed, but here we just pass it via description or assume context
-                // For simplicity, we'll embed the image url in the next task description or store it? 
-                // Let's cheat and store it in a temp way or just regenerate (mock).
-                // Better: addTask can take metadata. But keeping it simple.
+                let imageUrl = "https://placehold.co/600x400";
+                try {
+                    imageUrl = await api.generateImage(prompt);
+                    addLog(`Generated Media for: ${prompt}`, 'success');
+                } catch (e) {
+                    addLog(`Failed to generate media for: ${prompt}`, 'error');
+                }
+
+                addTask(`Post to Instagram: ${prompt}`, 'post_content', { imageUrl });
                 break;
 
             case 'post_content':
                 const content = task.description.split(": ")[1];
-                const post = await mockApi.postToInstagram(content, "https://placehold.co/600x400"); // using static/mock for now since we didn't pass state
+                const postImage = task.metadata?.imageUrl || "https://placehold.co/600x400";
+                const post = await api.postToInstagram(content, postImage);
                 addLog(`Posted to Instagram: ${post.id}`, 'success');
                 setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
                 break;
 
             case 'reply_dm':
                 const replyContent = "I'm just an AI agent running a simulation! 🤖";
-                await mockApi.sendMessage("user", replyContent);
+                await api.sendMessage("user", replyContent);
                 addLog("Sent reply DM.", 'success');
                 break;
         }
@@ -167,5 +171,31 @@ export function useAgent() {
         alert(summary); // Simple UI for demo
     }, [state.posts.length, state.messages, state.tasks, addLog]);
 
-    return { state, toggleAgent, addTask, generateSummary };
+    const startWorkflow = useCallback((config: WorkflowConfig) => {
+        addLog(`Starting workflow: ${config.type}`, 'warning');
+
+        // Reset state or keep logged in? Let's keep logged in but clear tasks? 
+        // For now, let's just append tasks to start fresh-ish.
+        setState(prev => ({ ...prev, isActive: true }));
+
+        if (config.enableDMs) {
+            addTask("Check DMs", "check_dms");
+        }
+
+        if (config.individualPosts && config.individualPosts.length > 0) {
+            config.individualPosts.forEach(post => {
+                addTask(`Plan and post to ${post.platform}: ${post.topic}`, "plan_content");
+            });
+        } else if (config.postCount > 0) {
+            for (let i = 0; i < config.postCount; i++) {
+                addTask(`Plan generic post #${i + 1}`, "plan_content");
+            }
+        }
+
+        if (config.type === 'full_day') {
+            // Maybe add long running background monitoring?
+        }
+    }, [addLog, addTask]);
+
+    return { state, toggleAgent, addTask, generateSummary, startWorkflow };
 }

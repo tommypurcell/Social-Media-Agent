@@ -1,11 +1,12 @@
 
-import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle } from 'lucide-react';
+import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone } from 'lucide-react';
 import { cn } from '../../lib/utils'; // Assuming I will create a utils file for clsx/tailwind-merge
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
     const navItems = [
         { icon: LayoutDashboard, label: 'Monitor', path: '/' },
+        { icon: Smartphone, label: 'Sample Feed', path: '/feed' },
         { icon: Library, label: 'Contents', path: '/contents' },
         { icon: Calendar, label: 'Planner', path: '/planner' },
         { icon: BarChart3, label: 'Reports', path: '/reports' },

@@ -27,6 +27,7 @@ export interface Task {
     type: 'plan_content' | 'generate_media' | 'post_content' | 'check_dms' | 'reply_dm' | 'idle';
     status: 'pending' | 'in_progress' | 'completed' | 'failed';
     description: string;
+    metadata?: any;
 }
 
 export interface Log {
@@ -43,4 +44,22 @@ export interface AgentState {
     posts: Post[];
     messages: Message[];
     logs: Log[];
+}
+
+export interface PostConfig {
+    id: number;
+    topic: string;
+    platform: 'instagram' | 'tiktok' | 'threads';
+    description?: string;
+}
+
+export interface WorkflowConfig {
+    type: 'full_day' | 'content_only' | 'dm_only' | 'plan_posts' | 'custom';
+    platforms: ('instagram' | 'tiktok' | 'threads')[];
+    postCount: number;
+    enableDMs: boolean;
+    enableSelfCorrection: boolean;
+    contentSource: 'upload' | 'ai_generated';
+    uploadedFiles?: File[];
+    individualPosts?: PostConfig[];
 }

@@ -1,45 +1,60 @@
-
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAgentContext } from '../lib/AgentContext';
 import { Activity, Clock, FileVideo, CheckCircle2, AlertCircle, Play } from 'lucide-react';
+import { NewWorkflowModal } from '../components/NewWorkflowModal';
+import type { WorkflowConfig } from '../lib/types';
 
 const AgentMonitor = () => {
-    const tasks = [
-        {
-            id: 1,
-            title: 'Summer Campaign - Teaser',
-            status: 'processing', // processing, completed, error, queued
-            stage: 'Rendering TikTok Version',
-            progress: 65,
-            platform: 'TikTok',
-            thumbnail: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        },
-        {
-            id: 2,
-            title: 'Product Launch v2',
-            status: 'completed',
-            stage: 'Scheduled for Tomorrow 10am',
-            progress: 100,
-            platform: 'Instagram',
-            thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        },
-        {
-            id: 3,
-            title: 'Behind the Scenes',
-            status: 'queued',
-            stage: 'Waiting for Agent',
-            progress: 0,
-            platform: 'Youtube Shorts',
-            thumbnail: null,
-        },
-        {
-            id: 4,
-            title: 'CEO Interview',
-            status: 'processing',
-            stage: 'Analyzing Prompt & Sentiment',
-            progress: 20,
-            platform: 'LinkedIn',
-            thumbnail: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-        },
-    ];
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { state, addTask, toggleAgent } = useAgentContext();
+    const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
+    const processedRef = useRef(false);
+
+    // Handle return from Workflow Planner
+    useEffect(() => {
+        if (location.state?.plannedPosts && !processedRef.current) {
+            const posts = location.state.plannedPosts as any[];
+            console.log("Received planned posts:", posts);
+
+            posts.forEach(post => {
+                // Determine stage based on post status/content
+                const taskType = post.imagePrompt ? 'generate_media' : 'post_content';
+                const description = post.imagePrompt
+                    ? `Generate Image: '${post.imagePrompt}' for ${post.platform}`
+                    : `Post to ${post.platform}: ${post.caption.substring(0, 30)}...`;
+
+                addTask(description, taskType);
+            });
+
+            // Auto-start the agent if it's not running
+            if (!state.isActive) {
+                toggleAgent();
+            }
+
+            processedRef.current = true;
+            // Clear location state to prevent duplicate addition
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, addTask, toggleAgent, state.isActive]);
+
+    const handleStartWorkflow = (config: WorkflowConfig) => {
+        console.log('Starting workflow with config:', config);
+        navigate('/workflow-planner', { state: { config } });
+    };
+
+    // Map real tasks to UI format
+    const activeTasks = state.tasks.map(task => ({
+        id: task.id,
+        title: task.description.split(':')[1] || task.description,
+        status: task.status === 'in_progress' ? 'processing' : task.status === 'pending' ? 'queued' : task.status,
+        stage: task.type.replace('_', ' ').toUpperCase(),
+        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
+        platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
+            task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
+        thumbnail: null
+    }));
 
     return (
         <div className="flex-1 overflow-y-auto bg-background p-8">
@@ -52,27 +67,35 @@ const AgentMonitor = () => {
                 {/* Status Overview Card */}
                 <div className="col-span-full xl:col-span-3 bg-surface rounded-xl shadow-sm border border-border p-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-accent/10 rounded-full">
-                            <Activity className="w-8 h-8 text-accent animate-pulse-slow" />
+                        <div className={`p-3 rounded-full ${state.isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
+                            <Activity className={`w-8 h-8 ${state.isActive ? 'text-green-600 animate-pulse' : 'text-gray-400'}`} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-primary">System Status: Active</h3>
-                            <p className="text-sm text-secondary">Processing 2 jobs concurrently. Next idle slot in 4m.</p>
+                            <h3 className="text-lg font-semibold text-primary">
+                                System Status: {state.isActive ? 'Active - Autonomous' : 'Standby'}
+                            </h3>
+                            <p className="text-sm text-secondary">
+                                {state.tasks.filter(t => t.status === 'in_progress').length} jobs running, {state.tasks.filter(t => t.status === 'pending').length} queued.
+                            </p>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <div className="text-right">
-                            <span className="block text-2xl font-bold text-primary">12</span>
-                            <span className="text-xs text-secondary uppercase tracking-wider">Completed Today</span>
+                            <span className="block text-2xl font-bold text-primary">
+                                {state.tasks.filter(t => t.status === 'completed').length}
+                            </span>
+                            <span className="text-xs text-secondary uppercase tracking-wider">Completed</span>
                         </div>
                         <div className="text-right border-l border-border pl-4">
-                            <span className="block text-2xl font-bold text-accent">2</span>
+                            <span className="block text-2xl font-bold text-accent">
+                                {state.tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length}
+                            </span>
                             <span className="text-xs text-secondary uppercase tracking-wider">Pending</span>
                         </div>
                     </div>
                 </div>
 
-                {tasks.map((task) => (
+                {activeTasks.map((task) => (
                     <div key={task.id} className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                         <div className="relative h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
                             {task.thumbnail ? (
@@ -119,7 +142,10 @@ const AgentMonitor = () => {
                 ))}
 
                 {/* Upload New Card */}
-                <div className="bg-surface rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 hover:border-accent hover:bg-accent/5 transition-all cursor-pointer min-h-[300px]">
+                <div
+                    onClick={() => setIsWorkflowModalOpen(true)}
+                    className="bg-surface rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 hover:border-accent hover:bg-accent/5 transition-all cursor-pointer min-h-[300px]"
+                >
                     <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
                         <FileVideo className="w-8 h-8 text-accent" />
                     </div>
@@ -128,6 +154,13 @@ const AgentMonitor = () => {
                 </div>
 
             </div>
+
+            {/* New Workflow Modal */}
+            <NewWorkflowModal
+                isOpen={isWorkflowModalOpen}
+                onClose={() => setIsWorkflowModalOpen(false)}
+                onStart={handleStartWorkflow}
+            />
         </div>
     );
 };
