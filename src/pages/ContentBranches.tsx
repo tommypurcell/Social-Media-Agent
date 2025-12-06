@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GitBranch, CheckCircle2, Sparkles, Eye } from 'lucide-react';
+import { GitBranch, Sparkles, Image as ImageIcon, Video, MessageSquare, Hash } from 'lucide-react';
 
 interface BranchNode {
     id: string;
@@ -8,33 +7,34 @@ interface BranchNode {
     name: string;
     caption: string;
     mediaUrl?: string;
-    platform: string;
+    platform: 'instagram' | 'tiktok' | 'threads' | 'twitter' | 'linkedin';
+    type: 'image' | 'video' | 'text';
     isSelected: boolean;
     depth: number;
     children: BranchNode[];
 }
 
 const ContentBranches = () => {
-    const navigate = useNavigate();
-
-    // Mock data - in real app this would come from workflow state
+    // Mock data: 10 diverse content items with branches
     const [branches, setBranches] = useState<BranchNode[]>([
         {
             id: '1',
-            name: 'Original',
-            caption: 'Morning coffee vibes ☕✨',
-            mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600',
+            name: 'Product Launch Teaser',
+            caption: 'Something big is coming... 🚀 #NewEra',
+            mediaUrl: 'https://images.pexels.com/photos/2528118/pexels-photo-2528118.jpeg?auto=compress&cs=tinysrgb&w=600',
             platform: 'instagram',
+            type: 'image',
             isSelected: true,
             depth: 0,
             children: [
                 {
                     id: '1a',
                     parentId: '1',
-                    name: 'Variant A',
-                    caption: 'Start your day right with the perfect brew ☕',
-                    mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600',
-                    platform: 'instagram',
+                    name: 'BTS Video Variant',
+                    caption: 'Behind the scenes of our secret project 🤫 #BTS',
+                    mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600', // Placeholder for video thumb
+                    platform: 'tiktok',
+                    type: 'video',
                     isSelected: false,
                     depth: 1,
                     children: []
@@ -42,33 +42,195 @@ const ContentBranches = () => {
                 {
                     id: '1b',
                     parentId: '1',
-                    name: 'Variant B',
-                    caption: 'Coffee is always a good idea ☕💫',
-                    mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600',
-                    platform: 'tiktok',
+                    name: 'Cryptic Thread',
+                    caption: 'You are not ready for this Tuesday. 💭',
+                    platform: 'threads',
+                    type: 'text',
                     isSelected: false,
                     depth: 1,
-                    children: [
-                        {
-                            id: '1b1',
-                            parentId: '1b',
-                            name: 'Remix 1',
-                            caption: 'But first, coffee ☕',
-                            mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600',
-                            platform: 'tiktok',
-                            isSelected: false,
-                            depth: 2,
-                            children: []
-                        }
-                    ]
-                },
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '2',
+            name: 'Monday Motivation',
+            caption: 'Discipline chooses what you want most over what you want now. 💪',
+            mediaUrl: 'https://images.pexels.com/photos/3755761/pexels-photo-3755761.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'instagram',
+            type: 'image',
+            isSelected: true,
+            depth: 0,
+            children: [
                 {
-                    id: '1c',
-                    parentId: '1',
-                    name: 'Variant C',
-                    caption: 'Morning rituals 🌅☕',
-                    mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    id: '2a',
+                    parentId: '2',
+                    name: 'Short Quote Thread',
+                    caption: 'Discipline > Motivation.',
                     platform: 'threads',
+                    type: 'text',
+                    isSelected: true,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '3',
+            name: 'Tech Tip Tuesday',
+            caption: '3 shortcuts that will save you hours this week ⚡️',
+            mediaUrl: 'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'tiktok',
+            type: 'video',
+            isSelected: false,
+            depth: 0,
+            children: [
+                {
+                    id: '3a',
+                    parentId: '3',
+                    name: 'Carousel Version',
+                    caption: 'Swipe to save time ➡️',
+                    mediaUrl: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    platform: 'instagram',
+                    type: 'image',
+                    isSelected: true,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '4',
+            name: 'Customer Spotlight',
+            caption: 'Loving how @Sarah uses our dashboard for her agency! ❤️',
+            mediaUrl: 'https://images.pexels.com/photos/3184655/pexels-photo-3184655.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'instagram',
+            type: 'image',
+            isSelected: true,
+            depth: 0,
+            children: []
+        },
+        {
+            id: '5',
+            name: 'Office Tour',
+            caption: 'Welcome to our HQ! Where the magic happens ✨',
+            mediaUrl: 'https://images.pexels.com/photos/1170412/pexels-photo-1170412.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'tiktok',
+            type: 'video',
+            isSelected: true,
+            depth: 0,
+            children: [
+                {
+                    id: '5a',
+                    parentId: '5',
+                    name: 'Photo Dump',
+                    caption: 'Office aesthetics 🌿🖥️',
+                    mediaUrl: 'https://images.pexels.com/photos/7070/space-desk-workspace-coworking.jpg?auto=compress&cs=tinysrgb&w=600',
+                    platform: 'instagram',
+                    type: 'image',
+                    isSelected: false,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '6',
+            name: 'Flash Sale Alert',
+            caption: '24 HOURS ONLY. 50% OFF. GO! 🚨',
+            platform: 'twitter',
+            type: 'text',
+            isSelected: false,
+            depth: 0,
+            children: [
+                {
+                    id: '6a',
+                    parentId: '6',
+                    name: 'Urgency Reel',
+                    caption: 'Do not miss this! ⏰',
+                    mediaUrl: 'https://images.pexels.com/photos/5632397/pexels-photo-5632397.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    platform: 'instagram',
+                    type: 'video',
+                    isSelected: true,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '7',
+            name: 'Industry News',
+            caption: 'AI usage in marketing has doubled in 2024. Here is what that means for you.',
+            platform: 'linkedin',
+            type: 'text',
+            isSelected: true,
+            depth: 0,
+            children: [
+                {
+                    id: '7a',
+                    parentId: '7',
+                    name: 'Visual Chart',
+                    caption: 'The stats speak for themselves 📈',
+                    mediaUrl: 'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    platform: 'instagram',
+                    type: 'image',
+                    isSelected: false,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '8',
+            name: 'Employee Spotlight',
+            caption: 'Meet Alex, our lead designer! 🎨',
+            mediaUrl: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'instagram',
+            type: 'image',
+            isSelected: true,
+            depth: 0,
+            children: []
+        },
+        {
+            id: '9',
+            name: 'Weekend Vibes',
+            caption: 'Logging off. See you Monday! ✌️',
+            mediaUrl: 'https://images.pexels.com/photos/1054974/pexels-photo-1054974.jpeg?auto=compress&cs=tinysrgb&w=600',
+            platform: 'instagram',
+            type: 'image',
+            isSelected: true,
+            depth: 0,
+            children: [
+                {
+                    id: '9a',
+                    parentId: '9',
+                    name: 'Casual Check-in',
+                    caption: 'Any fun weekend plans? 👇',
+                    platform: 'threads',
+                    type: 'text',
+                    isSelected: false,
+                    depth: 1,
+                    children: []
+                }
+            ]
+        },
+        {
+            id: '10',
+            name: 'Educational Deep Dive',
+            caption: 'How to build your personal brand in 5 steps. A thread. 🧵',
+            platform: 'threads',
+            type: 'text',
+            isSelected: true,
+            depth: 0,
+            children: [
+                {
+                    id: '10a',
+                    parentId: '10',
+                    name: 'Talking Head Video',
+                    caption: 'Personal branding 101 🧠',
+                    mediaUrl: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    platform: 'tiktok',
+                    type: 'video',
                     isSelected: true,
                     depth: 1,
                     children: []
@@ -89,79 +251,86 @@ const ContentBranches = () => {
         setBranches(updateBranches(branches));
     };
 
+    const getPlatformIcon = (platform: string) => {
+        switch (platform) {
+            case 'instagram': return <div className="p-1 rounded bg-pink-100 text-pink-600"><ImageIcon size={14} /></div>;
+            case 'tiktok': return <div className="p-1 rounded bg-black/10 text-black"><Video size={14} /></div>;
+            case 'threads': return <div className="p-1 rounded bg-gray-100 text-gray-600"><Hash size={14} /></div>;
+            case 'twitter': return <div className="p-1 rounded bg-blue-100 text-blue-500"><MessageSquare size={14} /></div>;
+            case 'linkedin': return <div className="p-1 rounded bg-blue-100 text-blue-700"><ImageIcon size={14} /></div>;
+            default: return <div className="p-1 rounded bg-gray-100 text-gray-500"><Sparkles size={14} /></div>;
+        }
+    };
+
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case 'video': return <Video size={16} className="text-slate-500" />;
+            case 'image': return <ImageIcon size={16} className="text-slate-500" />;
+            default: return <MessageSquare size={16} className="text-slate-500" />;
+        }
+    };
+
     const renderBranch = (branch: BranchNode) => {
         const hasChildren = branch.children.length > 0;
-        const selectedCount = countSelected(branch);
 
         return (
-            <div key={branch.id} className="relative">
+            <div key={branch.id} className="relative group">
                 {/* Branch Node */}
-                <div className={`flex items-start gap-4 mb-4 ${branch.depth > 0 ? 'ml-12' : ''}`}>
-                    {/* Connector Line */}
+                <div className={`flex items-start gap-4 mb-6 ${branch.depth > 0 ? 'ml-12' : ''}`}>
+                    {/* Connector Lines */}
                     {branch.depth > 0 && (
-                        <div className="absolute left-6 top-0 w-6 h-6 border-l-2 border-b-2 border-gray-300 rounded-bl-lg" />
+                        <div className="absolute left-[38px] -top-8 w-6 h-[calc(100%+32px)] -z-10 border-l-2 border-gray-200" />
+                    )}
+                    {branch.depth > 0 && (
+                        <div className="absolute left-[38px] top-6 w-8 h-6 border-b-2 border-l-2 border-gray-200 rounded-bl-xl -z-10" />
                     )}
 
-                    {/* Selection Checkbox */}
+                    {/* Checkbox (Visual Selector only) */}
                     <button
                         onClick={() => toggleSelection(branch.id)}
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${branch.isSelected
-                                ? 'bg-green-500 border-green-500'
-                                : 'border-gray-300 hover:border-green-400'
-                            }`}
+                        className={`mt-4 w-5 h-5 rounded border transition-colors flex items-center justify-center
+                            ${branch.isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 hover:border-gray-400'}`}
                     >
-                        {branch.isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
+                        {branch.isSelected && <Sparkles size={12} className="text-white" />}
                     </button>
 
+
                     {/* Branch Card */}
-                    <div
-                        className={`flex-1 bg-white rounded-xl border-2 transition-all ${branch.isSelected
-                                ? 'border-green-400 shadow-lg shadow-green-100'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                    >
-                        <div className="p-4">
-                            <div className="flex items-start gap-4">
-                                {/* Thumbnail */}
-                                {branch.mediaUrl && (
-                                    <img
-                                        src={branch.mediaUrl}
-                                        alt={branch.name}
-                                        className="w-24 h-24 object-cover rounded-lg"
-                                    />
-                                )}
+                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                        <div className="flex">
+                            {/* Media Thumbnail (if exists) */}
+                            {branch.mediaUrl ? (
+                                <div className="w-32 h-32 bg-gray-100 flex-shrink-0">
+                                    <img src={branch.mediaUrl} alt={branch.name} className="w-full h-full object-cover" />
+                                </div>
+                            ) : (
+                                <div className="w-32 h-32 bg-gradient-to-br from-indigo-50 to-slate-50 flex items-center justify-center flex-shrink-0 border-r border-gray-100">
+                                    <MessageSquare className="w-8 h-8 text-indigo-200" />
+                                </div>
+                            )}
 
-                                {/* Info */}
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h3 className="font-semibold text-gray-900">{branch.name}</h3>
-                                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full capitalize">
-                                            {branch.platform}
-                                        </span>
-                                        {branch.depth === 0 && (
-                                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                                                Root
-                                            </span>
-                                        )}
+                            <div className="p-4 flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                    {getPlatformIcon(branch.platform)}
+                                    <span className="text-sm font-semibold text-gray-900 truncate">{branch.name}</span>
+                                    {branch.depth === 0 && (
+                                        <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider rounded">Root</span>
+                                    )}
+                                </div>
+
+                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{branch.caption}</p>
+
+                                <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        {getTypeIcon(branch.type)}
+                                        <span className="capitalize">{branch.type}</span>
                                     </div>
-
-                                    <p className="text-sm text-gray-700 mb-3">{branch.caption}</p>
-
-                                    {/* Stats */}
-                                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                                        {hasChildren && (
-                                            <div className="flex items-center gap-1">
-                                                <GitBranch className="w-3.5 h-3.5" />
-                                                <span>{branch.children.length} variants</span>
-                                            </div>
-                                        )}
-                                        {selectedCount > 0 && (
-                                            <div className="flex items-center gap-1 text-green-600">
-                                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                                <span>{selectedCount} selected</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {hasChildren && (
+                                        <div className="flex items-center gap-1 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                                            <GitBranch size={12} />
+                                            {branch.children.length} variants
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -171,113 +340,29 @@ const ContentBranches = () => {
                 {/* Children */}
                 {hasChildren && (
                     <div className="relative">
-                        {branch.children.map((child) =>
-                            renderBranch(child)
-                        )}
+                        {branch.children.map((child) => renderBranch(child))}
                     </div>
                 )}
             </div>
         );
     };
 
-    const countSelected = (branch: BranchNode): number => {
-        let count = branch.isSelected ? 1 : 0;
-        branch.children.forEach(child => {
-            count += countSelected(child);
-        });
-        return count;
-    };
-
-    const getTotalSelected = () => {
-        return branches.reduce((sum, branch) => sum + countSelected(branch), 0);
-    };
-
-    const handlePublish = () => {
-        const selected = getTotalSelected();
-        alert(`Publishing ${selected} selected variant(s)!`);
-        // In real app, navigate to content pipeline with selected branches
-        navigate('/contents');
-    };
-
     return (
-        <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-purple-50 p-8">
-            {/* Header */}
-            <div className="max-w-5xl mx-auto mb-8">
-                <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
+            <div className="max-w-4xl mx-auto mb-12">
+                <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center">
+                        <GitBranch className="w-6 h-6 text-indigo-600" />
+                    </div>
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <GitBranch className="w-8 h-8 text-purple-600" />
-                            <h1 className="text-3xl font-bold text-gray-900">Content Branches</h1>
-                        </div>
-                        <p className="text-gray-600">
-                            Explore different versions of your content and select which ones to publish
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={handlePublish}
-                        disabled={getTotalSelected() === 0}
-                        className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-200 transition-all flex items-center gap-2"
-                    >
-                        <Sparkles className="w-5 h-5" />
-                        Publish {getTotalSelected()} Selected
-                    </button>
-                </div>
-
-                {/* Stats Bar */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <GitBranch className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {branches.reduce((sum, b) => sum + 1 + b.children.length + b.children.reduce((s, c) => s + c.children.length, 0), 0)}
-                                </div>
-                                <div className="text-xs text-gray-600">Total Variants</div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-green-600">{getTotalSelected()}</div>
-                                <div className="text-xs text-gray-600">Selected</div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Eye className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-blue-600">1</div>
-                                <div className="text-xs text-gray-600">Workflows</div>
-                            </div>
-                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900">Content Pipeline</h1>
+                        <p className="text-gray-500">Review and select generated content variants</p>
                     </div>
                 </div>
-            </div>
 
-            {/* Branch Tree */}
-            <div className="max-w-5xl mx-auto">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                {/* Main List */}
+                <div className="space-y-2">
                     {branches.map(branch => renderBranch(branch))}
-                </div>
-            </div>
-
-            {/* Help Text */}
-            <div className="max-w-5xl mx-auto mt-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                    <GitBranch className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-blue-800">
-                        <strong>How it works:</strong> Select the variants you want to publish by clicking the
-                        checkboxes. You can choose multiple versions to create A/B tests or publish to different
-                        platforms simultaneously.
-                    </div>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ import SampleFeedPage from './pages/SampleFeedPage';
 import Settings from './pages/Settings';
 import AuthCallback from './pages/AuthCallback';
 import Landing from './pages/Landing';
+import ContentBranches from './pages/ContentBranches';
 import { AgentProvider } from './lib/AgentContext';
 import { OnboardingProvider } from './lib/OnboardingContext';
 import { useOnboarding } from './hooks/useOnboarding';
@@ -89,6 +90,14 @@ function AppRoutes() {
         !isOnboardingComplete ? <Navigate to="/" replace /> : (
           <MainLayout>
             <Settings />
+          </MainLayout>
+        )
+      } />
+
+      <Route path="/branches" element={
+        !isOnboardingComplete ? <Navigate to="/" replace /> : (
+          <MainLayout>
+            <ContentBranches />
           </MainLayout>
         )
       } />

@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAgentContext } from '../lib/AgentContext';
-import { Film, Calendar, CheckCircle2, Clock, AlertCircle, Play, Eye, Heart, MessageCircle, Share2, Sparkles, GitBranch, X, ChevronRight } from 'lucide-react';
+import { Film, Calendar, CheckCircle2, Clock, AlertCircle, Play, Eye, Heart, MessageCircle, Share2, Sparkles, GitBranch, X, ChevronRight, Inbox, Reply } from 'lucide-react';
 import type { PlannedPost, ContentBranch } from '../lib/types';
 
 const ContentLibrary = () => {
@@ -101,6 +101,74 @@ const ContentLibrary = () => {
     const getPostForTask = (taskId: string) => {
         return state.posts.find(post => post.id.includes(taskId)) || state.posts[state.posts.length - 1];
     };
+
+    type FeedbackItem = {
+        id: string;
+        type: 'comment' | 'dm';
+        author: string;
+        message: string;
+        timestamp: number;
+        sentiment: 'positive' | 'neutral';
+    };
+
+    // Build combined feedback (comments + DMs) scoped to a piece of content
+    const getFeedbackForContent = (taskId: string): FeedbackItem[] => {
+        const post = getPostForTask(taskId);
+        const postTime = post?.timestamp ?? Date.now();
+
+        const commentItems: FeedbackItem[] = post?.simulatedComments?.map((comment) => ({
+            id: comment.id,
+            type: 'comment',
+            author: comment.username,
+            message: comment.text,
+            timestamp: new Date(comment.timestamp).getTime(),
+            sentiment: comment.likes > 10 ? 'positive' : 'neutral'
+        })) || [];
+
+        // If we only have a numeric comment count, generate a light placeholder entry
+        if (!commentItems.length && typeof post?.comments === 'number' && post.comments > 0) {
+            commentItems.push({
+                id: `${taskId}-comment-placeholder`,
+                type: 'comment',
+                author: 'community',
+                message: `${post.comments} comments recorded for this post.`,
+                timestamp: postTime,
+                sentiment: 'neutral'
+            });
+        }
+
+        const dmItems: FeedbackItem[] = state.messages
+            .filter(msg => !msg.isFromAgent && Math.abs(msg.timestamp - postTime) < 1000 * 60 * 60 * 6) // within 6h of post
+            .map(msg => ({
+                id: msg.id,
+                type: 'dm',
+                author: msg.sender,
+                message: msg.content,
+                timestamp: msg.timestamp,
+                sentiment: 'neutral'
+            }))
+            .slice(0, 10); // cap for readability
+
+        // If no time-aligned DMs, surface the latest 2 as a general signal
+        if (!dmItems.length) {
+            const fallback = state.messages.filter(m => !m.isFromAgent).slice(0, 2);
+            fallback.forEach(msg => {
+                dmItems.push({
+                    id: `${msg.id}-fallback`,
+                    type: 'dm',
+                    author: msg.sender,
+                    message: msg.content,
+                    timestamp: msg.timestamp,
+                    sentiment: 'neutral'
+                });
+            });
+        }
+
+        return [...commentItems, ...dmItems].sort((a, b) => b.timestamp - a.timestamp);
+    };
+
+    const selectedPost = selectedContentId ? getPostForTask(selectedContentId) : null;
+    const selectedFeedback = useMemo(() => selectedContentId ? getFeedbackForContent(selectedContentId) : [], [selectedContentId, state.messages, state.posts]);
 
     // Generate branches for a content (variations for different platforms/styles)
     const generateBranchesForContent = (task: any, metadata: any): ContentBranch[] => {
@@ -327,7 +395,7 @@ const ContentLibrary = () => {
                 </div>
             ) : selectedContentId ? (
                 // Expanded Branch View
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-6xl mx-auto">
                     <div className="mb-6 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <GitBranch className="w-6 h-6 text-purple-600" />
@@ -345,70 +413,131 @@ const ContentLibrary = () => {
                         </button>
                     </div>
 
-                    {/* Branch Stats */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <GitBranch className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div>
-                                    <div className="text-xl font-bold text-gray-900">
-                                        {contentBranches[selectedContentId]?.length || 0}
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div className="xl:col-span-2 space-y-6">
+                            {/* Branch Stats */}
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <GitBranch className="w-5 h-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xl font-bold text-gray-900">
+                                                {contentBranches[selectedContentId]?.length || 0}
+                                            </div>
+                                            <div className="text-xs text-gray-600">Total Variants</div>
+                                        </div>
                                     </div>
-                                    <div className="text-xs text-gray-600">Total Variants</div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xl font-bold text-green-600">
+                                                {contentBranches[selectedContentId]?.filter(b => b.isSelected).length || 0}
+                                            </div>
+                                            <div className="text-xs text-gray-600">Selected</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <Sparkles className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xl font-bold text-blue-600">
+                                                {new Set(contentBranches[selectedContentId]?.map(b => b.platform)).size || 0}
+                                            </div>
+                                            <div className="text-xs text-gray-600">Platforms</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+
+                            {/* Branch Tree */}
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <div className="mb-4 pb-4 border-b border-gray-200">
+                                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                                        <GitBranch className="w-4 h-4" />
+                                        Variation Tree
+                                    </h3>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Each variation is optimized for different platforms and goals
+                                    </p>
                                 </div>
-                                <div>
-                                    <div className="text-xl font-bold text-green-600">
-                                        {contentBranches[selectedContentId]?.filter(b => b.isSelected).length || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-600">Selected</div>
-                                </div>
+                                {contentBranches[selectedContentId]
+                                    ?.filter(b => !b.parentId)
+                                    .map(rootBranch => renderBranch(rootBranch, selectedContentId))}
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Sparkles className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <div className="text-xl font-bold text-blue-600">
-                                        {new Set(contentBranches[selectedContentId]?.map(b => b.platform)).size || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-600">Platforms</div>
-                                </div>
+
+                            {/* Publish Button */}
+                            <div className="flex justify-end">
+                                <button
+                                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 shadow-lg transition-all flex items-center gap-2"
+                                    disabled={!contentBranches[selectedContentId]?.some(b => b.isSelected)}
+                                >
+                                    <Sparkles className="w-5 h-5" />
+                                    Publish {contentBranches[selectedContentId]?.filter(b => b.isSelected).length || 0} Selected
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Branch Tree */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div className="mb-4 pb-4 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                                <GitBranch className="w-4 h-4" />
-                                Variation Tree
-                            </h3>
-                            <p className="text-xs text-gray-600 mt-1">
-                                Each variation is optimized for different platforms and goals
-                            </p>
+                        {/* Feedback Column */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p className="text-xs uppercase text-gray-500 tracking-wide">Feedback Stream</p>
+                                    <h3 className="text-xl font-semibold text-gray-900">Replies & DMs</h3>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">
+                                    <Inbox className="w-4 h-4" />
+                                    {selectedFeedback.length}
+                                </div>
+                            </div>
+
+                            {selectedPost && (
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+                                        <span className="px-2 py-0.5 bg-black text-white rounded-full capitalize">{selectedPost.platform}</span>
+                                        <span>{new Date(selectedPost.timestamp).toLocaleString()}</span>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-900 line-clamp-2">{selectedPost.content}</p>
+                                </div>
+                            )}
+
+                            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+                                {selectedFeedback.length === 0 && (
+                                    <div className="text-sm text-gray-500 border border-dashed border-gray-200 rounded-lg p-4 text-center">
+                                        No feedback yet — we’ll show replies and DMs here.
+                                    </div>
+                                )}
+                                {selectedFeedback.map(item => (
+                                    <div key={item.id} className="border border-gray-200 rounded-lg p-3 hover:border-indigo-200 transition-colors">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${item.type === 'comment' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+                                                    {item.type === 'comment' ? 'Reply' : 'DM'}
+                                                </span>
+                                                <span className="text-xs text-gray-500">{item.author}</span>
+                                            </div>
+                                            <span className="text-[11px] text-gray-400">
+                                                {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-800">{item.message}</p>
+                                        <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500">
+                                            <span className={item.sentiment === 'positive' ? 'text-green-600' : 'text-gray-500'}>
+                                                {item.sentiment === 'positive' ? 'Engaged' : 'Neutral'}
+                                            </span>
+                                            <button className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-semibold">
+                                                <Reply className="w-3.5 h-3.5" />
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        {contentBranches[selectedContentId]
-                            ?.filter(b => !b.parentId)
-                            .map(rootBranch => renderBranch(rootBranch, selectedContentId))}
-                    </div>
-
-                    {/* Publish Button */}
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 shadow-lg transition-all flex items-center gap-2"
-                            disabled={!contentBranches[selectedContentId]?.some(b => b.isSelected)}
-                        >
-                            <Sparkles className="w-5 h-5" />
-                            Publish {contentBranches[selectedContentId]?.filter(b => b.isSelected).length || 0} Selected
-                        </button>
                     </div>
                 </div>
             ) : (
