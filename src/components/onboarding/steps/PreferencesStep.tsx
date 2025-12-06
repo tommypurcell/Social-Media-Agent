@@ -61,41 +61,41 @@ const PreferencesStep = ({ formData, updateFormData }: PreferencesStepProps) => 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 py-4">
       <div className="text-center mb-8">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
           Which platforms do you use?
         </h3>
-        <p className="text-gray-600">
+        <p className="text-slate-600">
           Select the social media platforms you want to manage
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
         {platformOptions.map((platform) => {
           const isSelected = formData.platforms.includes(platform.id);
           return (
             <button
               key={platform.id}
               onClick={() => togglePlatform(platform.id)}
-              className={`group relative p-5 rounded-xl border-2 transition-all ${isSelected
-                  ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+              className={`group relative p-4 rounded-xl border-2 transition-all duration-200 ${isSelected
+                ? 'border-indigo-500 bg-indigo-50/50 shadow-md ring-1 ring-indigo-500/20'
+                : 'border-slate-100 bg-white hover:border-indigo-200 hover:shadow-md'
                 }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-xl ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                <div className={`w-12 h-12 rounded-xl ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-110 transition-transform duration-200`}>
                   {platform.icon}
                 </div>
                 <div className="flex-1 text-left">
-                  <h4 className={`font-semibold text-lg mb-1 ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>
+                  <h4 className={`font-bold text-lg mb-0.5 ${isSelected ? 'text-indigo-900' : 'text-slate-900'}`}>
                     {platform.name}
                   </h4>
-                  <p className="text-sm text-gray-600">{platform.description}</p>
+                  <p className="text-sm text-slate-500">{platform.description}</p>
                 </div>
                 {isSelected && (
-                  <div className="absolute top-3 right-3">
-                    <CheckCircle2 className="w-6 h-6 text-indigo-600" />
+                  <div className="absolute top-4 right-4">
+                    <CheckCircle2 className="w-6 h-6 text-indigo-600 fill-current" />
                   </div>
                 )}
               </div>
@@ -104,9 +104,9 @@ const PreferencesStep = ({ formData, updateFormData }: PreferencesStepProps) => 
         })}
       </div>
 
-      <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-lg max-w-2xl mx-auto">
-        <p className="text-sm text-amber-800">
-          <strong>Note:</strong> You can connect your accounts later in settings. This selection helps us personalize your dashboard.
+      <div className="mt-8 p-4 bg-amber-50/50 border border-amber-100 rounded-xl max-w-2xl mx-auto">
+        <p className="text-sm text-amber-900/80 leading-relaxed text-center">
+          <span className="font-semibold">✨ Pro Tip:</span> You can always connect more accounts later in your settings. This just helps us tailor your initial dashboard.
         </p>
       </div>
     </div>

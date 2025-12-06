@@ -6,17 +6,13 @@ const GRAPH_API_BASE = import.meta.env.VITE_META_GRAPH_API_BASE_URL;
 const GRAPH_API_VERSION = import.meta.env.VITE_META_GRAPH_API_VERSION;
 
 export class MetaAuthService {
-  // Instagram OAuth URL
+  // Instagram OAuth URL - Using minimal required scopes
   getInstagramAuthUrl(): string {
-    // Correct scopes for Instagram Graph API (not Basic Display)
+    // Start with basic permissions that work in development mode
+    // You can add more scopes after the app is configured
     const scope = [
-      'pages_show_list',              // Access to user's Facebook Pages
-      'pages_read_engagement',        // Read engagement data from Pages
-      'instagram_basic',              // Basic Instagram profile access
-      'instagram_content_publish',    // Publish content to Instagram
-      'instagram_manage_insights',    // Access Instagram insights
-      'instagram_manage_comments',    // Manage comments
-      'public_profile',               // Access to public profile
+      'public_profile',               // Basic Facebook profile (always available)
+      'email',                        // Email address (always available)
     ].join(',');
 
     const params = new URLSearchParams({
@@ -30,16 +26,12 @@ export class MetaAuthService {
     return `https://www.facebook.com/${GRAPH_API_VERSION}/dialog/oauth?${params.toString()}`;
   }
 
-  // Threads OAuth URL
+  // Threads OAuth URL - Using minimal required scopes
   getThreadsAuthUrl(): string {
-    // Correct scopes for Threads API
+    // Start with basic permissions that work in development mode
     const scope = [
-      'threads_basic',                // Basic Threads profile access
-      'threads_content_publish',      // Publish to Threads
-      'threads_manage_insights',      // Access Threads insights
-      'threads_manage_replies',       // Manage replies
-      'threads_read_replies',         // Read replies
-      'public_profile',               // Access to public profile
+      'public_profile',               // Basic Facebook profile (always available)
+      'email',                        // Email address (always available)
     ].join(',');
 
     const params = new URLSearchParams({

@@ -10,13 +10,15 @@ import FinalStep from './steps/FinalStep';
 
 interface OnboardingModalProps {
   onComplete: (data: OnboardingData) => void;
+  onClose?: () => void;
 }
 
-export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
+export const OnboardingModal = ({ onComplete, onClose }: OnboardingModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<OnboardingData>({
     fullName: '',
     email: '',
+    password: '',
     goals: [],
     primaryUseCase: '',
     platforms: [],
@@ -54,7 +56,7 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
       case 0:
         return true;
       case 1:
-        return formData.fullName.trim() !== '' && formData.email.trim() !== '';
+        return formData.fullName.trim() !== '' && formData.email.trim() !== '' && !!formData.password && formData.password.trim() !== '';
       case 2:
         return formData.goals.length > 0 && formData.primaryUseCase !== '';
       case 3:
@@ -69,37 +71,37 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
   const CurrentStepComponent = steps[currentStep].component;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Progress Bar */}
-        <div className="h-1.5 bg-gray-100">
+        <div className="h-1 bg-slate-100">
           <motion.div
-            className="h-full bg-gradient-to-r from-indigo-500 to-purple-600"
+            className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"
             initial={{ width: 0 }}
             animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
           />
         </div>
 
         {/* Header */}
-        <div className="px-8 pt-6 pb-4 border-b border-gray-100">
+        <div className="px-8 pt-8 pb-6 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
                 {steps[currentStep].title}
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-slate-500 mt-1 font-medium">
                 Step {currentStep + 1} of {steps.length}
               </p>
             </div>
             {currentStep === 0 && (
               <button
-                onClick={() => onComplete(formData)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={() => onClose ? onClose() : onComplete(formData)}
+                className="p-2 -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -108,13 +110,14 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
         </div>
 
         {/* Content */}
-        <div className="px-8 py-6 min-h-[400px]">
+        <div className="px-8 py-2 overflow-y-auto flex-grow custom-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
+              className="min-h-[300px]"
+              initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
               <CurrentStepComponent
@@ -126,13 +129,13 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+        <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between flex-shrink-0 mt-auto">
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${currentStep === 0
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-700 hover:bg-gray-200'
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all duration-200 ${currentStep === 0
+              ? 'text-slate-300 cursor-not-allowed'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
             <ArrowLeft className="w-4 h-4" />
@@ -143,11 +146,11 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full transition-all ${index === currentStep
-                    ? 'bg-indigo-600 w-6'
-                    : index < currentStep
-                      ? 'bg-indigo-300'
-                      : 'bg-gray-300'
+                className={`h-1.5 rounded-full transition-all duration-300 ${index === currentStep
+                  ? 'bg-indigo-600 w-6'
+                  : index < currentStep
+                    ? 'bg-indigo-200 w-1.5'
+                    : 'bg-slate-200 w-1.5'
                   }`}
               />
             ))}
@@ -156,9 +159,9 @@ export const OnboardingModal = ({ onComplete }: OnboardingModalProps) => {
           <button
             onClick={handleNext}
             disabled={!isStepValid()}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all ${isStepValid()
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            className={`flex items-center gap-2 px-8 py-3 rounded-full font-semibold transition-all duration-300 transform active:scale-95 ${isStepValid()
+              ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg hover:shadow-xl'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
               }`}
           >
             {currentStep === steps.length - 1 ? (

@@ -1,12 +1,13 @@
-
-import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone, CheckCircle } from 'lucide-react';
-import { cn } from '../../lib/utils'; // Assuming I will create a utils file for clsx/tailwind-merge
+import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone, CheckCircle, LogOut } from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { tokenStorage } from '../../services/tokenStorage';
+import { useOnboarding } from '../../hooks/useOnboarding';
 
 const Sidebar = () => {
     const [connectedCount, setConnectedCount] = useState(0);
+    const { onboardingData, resetOnboarding } = useOnboarding();
 
     useEffect(() => {
         const checkConnections = () => {
@@ -21,7 +22,7 @@ const Sidebar = () => {
     }, []);
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Monitor', path: '/' },
+        { icon: LayoutDashboard, label: 'Monitor', path: '/dashboard' },
         { icon: Smartphone, label: 'Sample Feed', path: '/feed' },
         { icon: Library, label: 'Contents', path: '/contents' },
         { icon: Calendar, label: 'Planner', path: '/planner' },
@@ -86,13 +87,22 @@ const Sidebar = () => {
                         <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white lg:hidden"></span>
                     )}
                 </NavLink>
-                <div className="flex items-center px-3 py-2.5 text-secondary hover:text-primary cursor-pointer">
+
+                <div className="flex items-center px-3 py-2.5 bg-gray-50/50 rounded-lg">
                     <UserCircle className="w-8 h-8 flex-shrink-0 text-gray-400" />
-                    <div className="ml-3 hidden lg:block">
-                        <p className="text-sm font-medium text-primary">Marathon Agent</p>
-                        <p className="text-xs text-secondary">Active</p>
+                    <div className="ml-3 hidden lg:block overflow-hidden">
+                        <p className="text-sm font-medium text-primary truncate">{onboardingData?.fullName || 'User'}</p>
+                        <p className="text-xs text-secondary truncate">{onboardingData?.email || 'Active'}</p>
                     </div>
                 </div>
+
+                <button
+                    onClick={resetOnboarding}
+                    className="w-full flex items-center px-3 py-2.5 text-secondary hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                >
+                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                    <span className="ml-3 hidden lg:block">Sign Out</span>
+                </button>
             </div>
         </div>
     );
