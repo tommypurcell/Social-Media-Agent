@@ -121,6 +121,9 @@ const WorkflowPlanner = () => {
             instagram: { captionStyle: 'Visual storytelling with emojis', hashtagCount: 10 },
             tiktok: { captionStyle: 'Short, punchy, trending', hashtagCount: 5 },
             threads: { captionStyle: 'Conversational and authentic', hashtagCount: 3 },
+            linkedin: { captionStyle: 'Professional, insightful, and value-driven', hashtagCount: 3 },
+            twitter: { captionStyle: 'Concise, engaging, news-worthy', hashtagCount: 2 },
+            facebook: { captionStyle: 'Friendly, community-focused, storytelling', hashtagCount: 5 },
         };
 
         const style = platformStyles[post.platform as keyof typeof platformStyles] || platformStyles.instagram;
@@ -200,24 +203,22 @@ const WorkflowPlanner = () => {
                     {plannedPosts.map((post) => (
                         <div
                             key={post.id}
-                            className={`bg-surface rounded-xl border transition-all ${
-                                post.status === 'planning' && currentlyPlanning === post.id
+                            className={`bg-surface rounded-xl border transition-all ${post.status === 'planning' && currentlyPlanning === post.id
                                     ? 'border-orange-400 shadow-sm shadow-orange-100'
                                     : post.status === 'planned'
-                                    ? 'border-border hover:border-gray-300'
-                                    : 'border-border'
-                            }`}
+                                        ? 'border-border hover:border-gray-300'
+                                        : 'border-border'
+                                }`}
                         >
                             {/* Post Header */}
                             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                        post.status === 'planning' && currentlyPlanning === post.id
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${post.status === 'planning' && currentlyPlanning === post.id
                                             ? 'bg-orange-100'
                                             : post.status === 'planned'
-                                            ? 'bg-green-100'
-                                            : 'bg-gray-100'
-                                    }`}>
+                                                ? 'bg-green-100'
+                                                : 'bg-gray-100'
+                                        }`}>
                                         {post.status === 'planning' && currentlyPlanning === post.id ? (
                                             <Loader2 className="w-4 h-4 text-orange-600 animate-spin" />
                                         ) : post.status === 'planned' ? (
@@ -265,21 +266,19 @@ const WorkflowPlanner = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'photo')}
-                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                                                            post.postType === 'photo'
+                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'photo'
                                                                 ? 'border-orange-500 bg-orange-50 text-orange-700'
                                                                 : 'border-border bg-background text-secondary hover:border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         Photo Post
                                                     </button>
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'reel')}
-                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                                                            post.postType === 'reel'
+                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'reel'
                                                                 ? 'border-orange-500 bg-orange-50 text-orange-700'
                                                                 : 'border-border bg-background text-secondary hover:border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         Reel
                                                     </button>
@@ -316,11 +315,10 @@ const WorkflowPlanner = () => {
                                                 <label className="text-xs font-medium text-secondary">Hashtags</label>
                                                 <button
                                                     onClick={() => handleEditPost(post.id, 'useHashtags', !post.useHashtags)}
-                                                    className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${
-                                                        post.useHashtags
+                                                    className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${post.useHashtags
                                                             ? 'bg-orange-100 text-orange-700'
                                                             : 'bg-gray-100 text-gray-500'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {post.useHashtags ? 'Enabled' : 'Disabled'}
                                                 </button>

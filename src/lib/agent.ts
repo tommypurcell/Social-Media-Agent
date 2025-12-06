@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { AgentState, Task, Log, WorkflowConfig } from './types';
+import type { AgentState, Task, Log, WorkflowConfig, Post } from './types';
 import { api } from './api';
 
 const INITIAL_STATE: AgentState = {
@@ -131,8 +131,24 @@ export function useAgent() {
             case 'post_content':
                 const content = task.description.split(": ")[1];
                 const postImage = task.metadata?.imageUrl || "https://placehold.co/600x400";
-                const post = await api.postToInstagram(content, postImage);
-                addLog(`Posted to Instagram: ${post.id}`, 'success');
+
+                let post: Post;
+                const descLower = task.description.toLowerCase();
+
+                if (descLower.includes('linkedin')) {
+                    post = await api.postToLinkedin(content, postImage);
+                } else if (descLower.includes('twitter') || descLower.includes('x')) {
+                    post = await api.postToTwitter(content, postImage);
+                } else if (descLower.includes('facebook')) {
+                    post = await api.postToFacebook(content, postImage);
+                } else if (descLower.includes('threads')) {
+                    post = await api.postToThreads(content);
+                } else {
+                    // Default to Instagram
+                    post = await api.postToInstagram(content, postImage);
+                }
+
+                addLog(`Posted to ${post.platform}: ${post.id}`, 'success');
                 setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
                 break;
 

@@ -69,6 +69,45 @@ export const api = {
         };
     },
 
+    async postToLinkedin(content: string, imageUrl?: string): Promise<Post> {
+        await delay(1800);
+        return {
+            id: Math.random().toString(36).substr(2, 9),
+            content,
+            image: imageUrl,
+            platform: 'linkedin',
+            likes: 0,
+            comments: [],
+            timestamp: Date.now(),
+        };
+    },
+
+    async postToTwitter(content: string, imageUrl?: string): Promise<Post> {
+        await delay(1200);
+        return {
+            id: Math.random().toString(36).substr(2, 9),
+            content,
+            image: imageUrl,
+            platform: 'twitter',
+            likes: 0,
+            comments: [],
+            timestamp: Date.now(),
+        };
+    },
+
+    async postToFacebook(content: string, imageUrl?: string): Promise<Post> {
+        await delay(1600);
+        return {
+            id: Math.random().toString(36).substr(2, 9),
+            content,
+            image: imageUrl,
+            platform: 'facebook',
+            likes: 0,
+            comments: [],
+            timestamp: Date.now(),
+        };
+    },
+
     async fetchMessages(): Promise<Message[]> {
         await delay(1000);
         // Simulate receiving new messages occasionally

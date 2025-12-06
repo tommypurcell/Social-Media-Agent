@@ -2,7 +2,7 @@ export interface Post {
     id: string;
     content: string;
     image?: string;
-    platform: 'instagram' | 'threads';
+    platform: 'instagram' | 'threads' | 'tiktok' | 'linkedin' | 'twitter' | 'facebook';
     likes: number;
     comments: Comment[];
     timestamp: number;
@@ -49,13 +49,13 @@ export interface AgentState {
 export interface PostConfig {
     id: number;
     topic: string;
-    platform: 'instagram' | 'tiktok' | 'threads';
+    platform: 'instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook';
     description?: string;
 }
 
 export interface WorkflowConfig {
     type: 'full_day' | 'content_only' | 'dm_only' | 'plan_posts' | 'custom';
-    platforms: ('instagram' | 'tiktok' | 'threads')[];
+    platforms: ('instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook')[];
     postCount: number;
     enableDMs: boolean;
     enableSelfCorrection: boolean;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Zap, MessageCircle, CalendarClock, Sparkles, Upload, Wand2 } from 'lucide-react';
+import { X, Zap, CalendarClock, Upload, Wand2, MessageCircle } from 'lucide-react';
 import type { WorkflowConfig, PostConfig } from '../lib/types';
 
 interface NewWorkflowModalProps {
@@ -26,44 +26,12 @@ const WORKFLOW_PRESETS = [
             contentSource: 'ai_generated' as const,
         }
     },
-    {
-        id: 'full_day',
-        name: 'Full Day Simulation',
-        description: 'Complete autonomous workflow: planning, posting, DMs, and self-correction',
-        icon: Sparkles,
-        color: 'amber',
-        customizable: false,
-        config: {
-            type: 'full_day' as const,
-            platforms: ['instagram' as const, 'tiktok' as const],
-            postCount: 3,
-            enableDMs: true,
-            enableSelfCorrection: true,
-            contentSource: 'ai_generated' as const,
-        }
-    },
-    {
-        id: 'dm_only',
-        name: 'DM Response',
-        description: 'Focus on checking and replying to messages',
-        icon: MessageCircle,
-        color: 'yellow',
-        customizable: false,
-        config: {
-            type: 'dm_only' as const,
-            platforms: ['instagram' as const],
-            postCount: 0,
-            enableDMs: true,
-            enableSelfCorrection: false,
-            contentSource: 'ai_generated' as const,
-        }
-    },
 ];
 
 export function NewWorkflowModal({ isOpen, onClose, onStart }: NewWorkflowModalProps) {
     const [selectedPreset, setSelectedPreset] = useState<string>('plan_posts');
     const [postCount, setPostCount] = useState<number>(3);
-    const [selectedPlatforms, setSelectedPlatforms] = useState<('instagram' | 'tiktok' | 'threads')[]>(['instagram']);
+    const [selectedPlatforms, setSelectedPlatforms] = useState<('instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook')[]>(['instagram']);
     const [contentSource, setContentSource] = useState<'upload' | 'ai_generated'>('ai_generated');
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [individualPosts, setIndividualPosts] = useState<PostConfig[]>([]);
@@ -113,7 +81,7 @@ export function NewWorkflowModal({ isOpen, onClose, onStart }: NewWorkflowModalP
         onClose();
     };
 
-    const togglePlatform = (platform: 'instagram' | 'tiktok' | 'threads') => {
+    const togglePlatform = (platform: 'instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook') => {
         setSelectedPlatforms(prev =>
             prev.includes(platform)
                 ? prev.filter(p => p !== platform)
@@ -204,8 +172,8 @@ export function NewWorkflowModal({ isOpen, onClose, onStart }: NewWorkflowModalP
                                     <button
                                         onClick={() => setMakePosts(!makePosts)}
                                         className={`p-4 rounded-xl border-2 text-left transition-all ${makePosts
-                                                ? 'border-orange-500 bg-orange-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300'
+                                            ? 'border-orange-500 bg-orange-50'
+                                            : 'border-gray-200 bg-white hover:border-gray-300'
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
@@ -229,8 +197,8 @@ export function NewWorkflowModal({ isOpen, onClose, onStart }: NewWorkflowModalP
                                     <button
                                         onClick={() => setHandleDMs(!handleDMs)}
                                         className={`p-4 rounded-xl border-2 text-left transition-all ${handleDMs
-                                                ? 'border-orange-500 bg-orange-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300'
+                                            ? 'border-orange-500 bg-orange-50'
+                                            : 'border-gray-200 bg-white hover:border-gray-300'
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
@@ -283,7 +251,7 @@ export function NewWorkflowModal({ isOpen, onClose, onStart }: NewWorkflowModalP
                                         Select platforms
                                     </label>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {(['instagram', 'tiktok', 'threads'] as const).map((platform) => (
+                                        {(['instagram', 'tiktok', 'threads', 'linkedin', 'twitter', 'facebook'] as const).map((platform) => (
                                             <button
                                                 key={platform}
                                                 onClick={() => togglePlatform(platform)}
