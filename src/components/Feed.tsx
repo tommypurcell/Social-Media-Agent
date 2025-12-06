@@ -1,12 +1,13 @@
 import type { Post } from '../lib/types';
-import { Instagram, Heart, MessageCircle, Music, Eye, Share2, Bookmark } from 'lucide-react';
+import { Instagram, Heart, MessageCircle, Music, Eye, Share2, Bookmark, Play } from 'lucide-react';
 import { useState } from 'react';
 
 interface FeedProps {
     posts: Post[];
+    onSelect?: (post: Post) => void;
 }
 
-export function Feed({ posts }: FeedProps) {
+export function Feed({ posts, onSelect }: FeedProps) {
     const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
 
     const toggleComments = (postId: string) => {
@@ -74,7 +75,11 @@ export function Feed({ posts }: FeedProps) {
                             const postPlatform = post.platform || 'instagram';
 
                             return (
-                                <div key={post.id} className="pb-4 animate-in fade-in duration-500">
+                                <div
+                                    key={post.id}
+                                    className="pb-4 animate-in fade-in duration-500 cursor-pointer"
+                                    onClick={() => onSelect?.(post)}
+                                >
                                     {/* Post Header */}
                                     <div className="px-4 py-3 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -92,7 +97,19 @@ export function Feed({ posts }: FeedProps) {
                                     </div>
 
                                     {/* Post Media */}
-                                    {post.image && (
+                                    {(post.mediaType === 'video' && (post.mediaUrl || post.image)) ? (
+                                        <div className="relative aspect-video w-full overflow-hidden bg-gray-100 group">
+                                            <video
+                                                src={post.mediaUrl || post.image}
+                                                className="w-full h-full object-cover"
+                                                muted
+                                                loop
+                                                playsInline
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors" />
+                                            <Play className="absolute w-12 h-12 text-white opacity-80 inset-0 m-auto drop-shadow" />
+                                        </div>
+                                    ) : post.image && (
                                         <div className="aspect-video w-full overflow-hidden bg-gray-100">
                                             <img src={post.image} alt="Post" className="w-full h-full object-cover" />
                                         </div>

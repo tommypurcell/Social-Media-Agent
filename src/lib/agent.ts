@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { AgentState, Task, Log, WorkflowConfig } from './types';
+import type { AgentState, Task, Log, WorkflowConfig, Message, ChatMessage } from './types';
 import { api } from './api';
 import { mockSocialMedia } from '../services/mockSocialMedia';
 
@@ -9,7 +9,15 @@ const INITIAL_STATE: AgentState = {
     tasks: [],
     posts: [],
     messages: [],
-    logs: []
+    logs: [],
+    chatHistory: [
+        {
+            id: 'init_1',
+            role: 'agent',
+            content: 'Hello! I am your AI Social Media Agent. How can I help you today?',
+            timestamp: Date.now()
+        }
+    ]
 };
 
 export function useAgent() {
@@ -33,7 +41,8 @@ export function useAgent() {
             type,
             status: 'pending',
             description,
-            metadata
+            metadata,
+            createdAt: Date.now()
         };
         setState(prev => ({
             ...prev,
@@ -45,13 +54,70 @@ export function useAgent() {
     const toggleAgent = useCallback(() => {
         setState(prev => {
             const isActive = !prev.isActive;
-            // logging needs to happen after state update ideally or with the new state, but here we just toggle
             return { ...prev, isActive };
         });
-        // We can't log 'isActive' correctly here because we don't have the new state yet in this scope
-        // strictly speaking. But let's leave logged message generic or fix it.
         addLog("Agent toggled.", 'warning');
     }, [addLog]);
+
+    const sendChatMessage = useCallback(async (content: string) => {
+        // 1. Add User Message
+        const userMsg: ChatMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            role: 'user',
+            content,
+            timestamp: Date.now()
+        };
+
+        setState(prev => ({
+            ...prev,
+            chatHistory: [...prev.chatHistory, userMsg]
+        }));
+
+        // 2. Simulate Agent Thinking
+        await new Promise(r => setTimeout(r, 600));
+
+        // 3. Analyze & Respond
+        let responseText = "I understand. I'm updating my context.";
+        const lowercaseContent = content.toLowerCase();
+
+        if (lowercaseContent.includes('start') && lowercaseContent.includes('agent')) {
+            responseText = "Starting autonomous mode immediately.";
+            // toggleAgent logic - but we can't call toggleAgent directly easily due to closure/dep cycles if we aren't careful?
+            // Actually we can just setState directly or call the function if available. 
+            // Better to just set Active directly here to avoid complex deps.
+            setState(prev => ({ ...prev, isActive: true }));
+        } else if (lowercaseContent.includes('stop') && lowercaseContent.includes('agent')) {
+            responseText = "Stopping all activities. I'm now in standby.";
+            setState(prev => ({ ...prev, isActive: false }));
+        } else if (lowercaseContent.includes('plan') && lowercaseContent.includes('post')) {
+            responseText = "I'll queue up a planning task for a new post right away.";
+            addTask("Plan new content based on user chat request", "plan_content");
+        } else if (lowercaseContent.includes('policy') || lowercaseContent.includes('prompt')) {
+            responseText = "I've updated my internal guidelines based on your request. I will follow this new policy for future tasks.";
+            addLog("Policy updated by user interaction", "warning");
+        } else {
+            // Generic fallback using simple "AI" response simulation
+            const responses = [
+                "I've noted that. Is there anything specific you'd like me to focus on?",
+                "Understood. I'll adjust my approach accordingly.",
+                "Got it. I'm monitoring the situation.",
+                "I can help with that. Just let me know if you need to schedule a workflow."
+            ];
+            responseText = responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        const agentMsg: ChatMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            role: 'agent',
+            content: responseText,
+            timestamp: Date.now()
+        };
+
+        setState(prev => ({
+            ...prev,
+            chatHistory: [...prev.chatHistory, agentMsg]
+        }));
+    }, [addTask, addLog]);
 
     const executeTask = useCallback(async (task: Task) => {
         addLog(`Executing: ${task.description}...`);
@@ -67,7 +133,7 @@ export function useAgent() {
                     setState(prev => ({ ...prev, messages: [...prev.messages, ...newMsgs] }));
                     // Auto-reply logic
                     newMsgs.forEach((msg) => {
-                        addTask(`Reply to ${msg.sender}: "Thanks for reaching out!"`, 'reply_dm');
+                        addTask(`Reply to ${msg.sender}: "${msg.content.slice(0, 40)}..."`, 'reply_dm', { message: msg });
                     });
                 } else {
                     addLog("Checked DMs: No new messages.");
@@ -124,7 +190,9 @@ export function useAgent() {
                 const post = {
                     id: simulatedPost.id,
                     content: simulatedPost.caption,
-                    image: simulatedPost.mediaUrl || '',
+                    image: simulatedPost.mediaType === 'image' ? (simulatedPost.mediaUrl || '') : undefined,
+                    mediaUrl: simulatedPost.mediaUrl,
+                    mediaType: simulatedPost.mediaType,
                     timestamp: simulatedPost.timestamp.getTime(),
                     likes: simulatedPost.engagement.likes,
                     comments: simulatedPost.engagement.comments,
@@ -137,13 +205,75 @@ export function useAgent() {
                 };
 
                 setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
+
+                // Schedule auto-replies to first few comments
+                if (simulatedPost.comments.length > 0) {
+                    simulatedPost.comments.slice(0, 5).forEach(comment => {
+                        addTask(
+                            `Reply to ${comment.username} on ${platform}`,
+                            'reply_comment',
+                            {
+                                postId: simulatedPost.id,
+                                commentId: comment.id,
+                                commenter: comment.username,
+                                commentText: comment.text
+                            }
+                        );
+                    });
+                }
                 break;
             }
 
             case 'reply_dm': {
-                const replyContent = "I'm just an AI agent running a simulation! 🤖";
-                await api.sendMessage("user", replyContent);
-                addLog("Sent reply DM.", 'success');
+                const msg = task.metadata as { message?: Message } | undefined;
+                const sender = msg?.message?.sender || 'there';
+                const original = msg?.message?.content || '';
+                const replyContent = `Hey ${sender}, thanks for reaching out! Saw your note: "${original.slice(0, 80)}". I'll keep you posted.`;
+
+                const sent = await api.sendMessage(sender, replyContent);
+                setState(prev => ({ ...prev, messages: [...prev.messages, sent] }));
+                addLog(`Sent auto-reply DM to ${sender}.`, 'success');
+                break;
+            }
+
+            case 'reply_comment': {
+                const meta = task.metadata as {
+                    postId?: string;
+                    commenter?: string;
+                    commentText?: string;
+                } | undefined;
+                if (!meta?.postId) {
+                    addLog("No post id for comment reply task", 'error');
+                    break;
+                }
+
+                const commenter = meta.commenter || 'friend';
+                const commentText = meta.commentText || '';
+                const replyText = `Thanks ${commenter}! Appreciate your thoughts${commentText ? ` on "${commentText.slice(0, 60)}"` : ''}.`;
+
+                await mockSocialMedia.addComment(meta.postId, replyText, 'agent');
+
+                // Reflect reply in local state for UI
+                setState(prev => ({
+                    ...prev,
+                    posts: prev.posts.map(p => p.id === meta.postId
+                        ? {
+                            ...p,
+                            simulatedComments: [
+                                {
+                                    id: `agent_reply_${Date.now()}`,
+                                    username: 'agent',
+                                    text: replyText,
+                                    timestamp: new Date().toISOString(),
+                                    likes: 0
+                                },
+                                ...(p.simulatedComments || [])
+                            ]
+                        }
+                        : p)
+                }));
+
+                addLog(`Replied to comment from ${commenter}.`, 'success');
                 break;
             }
         }
@@ -152,7 +282,7 @@ export function useAgent() {
         setState(prev => ({
             ...prev,
             currentTask: null,
-            tasks: prev.tasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t)
+            tasks: prev.tasks.map(t => t.id === task.id ? { ...t, status: 'completed', completedAt: Date.now() } : t)
         }));
     }, [addLog, addTask]);
 
@@ -246,5 +376,5 @@ export function useAgent() {
         }
     }, [addLog, addTask]);
 
-    return { state, toggleAgent, addTask, generateSummary, startWorkflow };
+    return { state, toggleAgent, addTask, generateSummary, startWorkflow, sendChatMessage };
 }

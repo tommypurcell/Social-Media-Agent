@@ -8,6 +8,7 @@ interface AgentContextType {
     addTask: (description: string, type: Task['type'], metadata?: Record<string, unknown>) => void;
     generateSummary: () => void;
     startWorkflow: (config: WorkflowConfig) => void;
+    sendChatMessage: (content: string) => void;
 }
 
 const AgentContext = createContext<AgentContextType | null>(null);

@@ -115,6 +115,8 @@ const ContentLibrary = () => {
     const getFeedbackForContent = (taskId: string): FeedbackItem[] => {
         const post = getPostForTask(taskId);
         const postTime = post?.timestamp ?? Date.now();
+        const captionSnippet = post?.content?.slice(0, 60) || 'your post';
+        const platform = post?.platform || 'instagram';
 
         const commentItems: FeedbackItem[] = post?.simulatedComments?.map((comment) => ({
             id: comment.id,
@@ -141,11 +143,11 @@ const ContentLibrary = () => {
             .filter(msg => !msg.isFromAgent && Math.abs(msg.timestamp - postTime) < 1000 * 60 * 60 * 6) // within 6h of post
             .map(msg => ({
                 id: msg.id,
-                type: 'dm',
+                type: 'dm' as const,
                 author: msg.sender,
                 message: msg.content,
                 timestamp: msg.timestamp,
-                sentiment: 'neutral'
+                sentiment: 'neutral' as const
             }))
             .slice(0, 10); // cap for readability
 
@@ -164,7 +166,46 @@ const ContentLibrary = () => {
             });
         }
 
-        return [...commentItems, ...dmItems].sort((a, b) => b.timestamp - a.timestamp);
+        // Add tailored example replies/DMs if still sparse
+        const samples: FeedbackItem[] = [];
+        if ((commentItems.length + dmItems.length) < 4) {
+            samples.push(
+                {
+                    id: `${taskId}-sample-reply-1`,
+                    type: 'comment',
+                    author: platform === 'tiktok' ? 'fyp_fan' : 'creator_circle',
+                    message: `Loving the angle on "${captionSnippet}" — what inspired this?`,
+                    timestamp: postTime + 1000,
+                    sentiment: 'positive'
+                },
+                {
+                    id: `${taskId}-sample-reply-2`,
+                    type: 'comment',
+                    author: platform === 'threads' ? 'conversation_starter' : 'daily_supporter',
+                    message: `Saved this for later. Any tips to try this myself?`,
+                    timestamp: postTime + 2000,
+                    sentiment: 'positive'
+                },
+                {
+                    id: `${taskId}-sample-dm-1`,
+                    type: 'dm',
+                    author: 'brand_partner',
+                    message: `Hey! We saw "${captionSnippet}" and want to collaborate on a similar campaign. Are you open to a quick chat?`,
+                    timestamp: postTime + 3000,
+                    sentiment: 'neutral'
+                },
+                {
+                    id: `${taskId}-sample-dm-2`,
+                    type: 'dm',
+                    author: 'community_member',
+                    message: `This resonated with me. Do you have a newsletter or more resources on this topic?`,
+                    timestamp: postTime + 4000,
+                    sentiment: 'positive'
+                }
+            );
+        }
+
+        return [...commentItems, ...dmItems, ...samples].sort((a, b) => b.timestamp - a.timestamp);
     };
 
     const selectedPost = selectedContentId ? getPostForTask(selectedContentId) : null;
@@ -285,21 +326,19 @@ const ContentLibrary = () => {
                     {/* Selection Checkbox */}
                     <button
                         onClick={() => toggleBranchSelection(taskId, branch.id)}
-                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                            branch.isSelected
+                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${branch.isSelected
                                 ? 'bg-green-500 border-green-500'
                                 : 'border-gray-300 hover:border-green-400'
-                        }`}
+                            }`}
                     >
                         {branch.isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                     </button>
 
                     {/* Branch Card */}
-                    <div className={`flex-1 bg-white rounded-lg border-2 transition-all ${
-                        branch.isSelected
+                    <div className={`flex-1 bg-white rounded-lg border-2 transition-all ${branch.isSelected
                             ? 'border-green-400 shadow-md'
                             : 'border-gray-200 hover:border-gray-300'
-                    }`}>
+                        }`}>
                         <div className="p-3">
                             <div className="flex items-start gap-3">
                                 {/* Thumbnail */}

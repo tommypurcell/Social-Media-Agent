@@ -21,9 +21,9 @@ const ContentBranches = () => {
             id: '1',
             name: 'Product Launch Teaser',
             caption: 'Something big is coming... 🚀 #NewEra',
-            mediaUrl: 'https://images.pexels.com/photos/2528118/pexels-photo-2528118.jpeg?auto=compress&cs=tinysrgb&w=600',
+            mediaUrl: '/assets/videos/science.mp4',
             platform: 'instagram',
-            type: 'image',
+            type: 'video',
             isSelected: true,
             depth: 0,
             children: [
@@ -32,7 +32,7 @@ const ContentBranches = () => {
                     parentId: '1',
                     name: 'BTS Video Variant',
                     caption: 'Behind the scenes of our secret project 🤫 #BTS',
-                    mediaUrl: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600', // Placeholder for video thumb
+                    mediaUrl: '/assets/videos/google_test.mp4',
                     platform: 'tiktok',
                     type: 'video',
                     isSelected: false,
@@ -79,7 +79,7 @@ const ContentBranches = () => {
             id: '3',
             name: 'Tech Tip Tuesday',
             caption: '3 shortcuts that will save you hours this week ⚡️',
-            mediaUrl: 'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=600',
+            mediaUrl: '/assets/videos/google_test.mp4',
             platform: 'tiktok',
             type: 'video',
             isSelected: false,
@@ -114,7 +114,7 @@ const ContentBranches = () => {
             id: '5',
             name: 'Office Tour',
             caption: 'Welcome to our HQ! Where the magic happens ✨',
-            mediaUrl: 'https://images.pexels.com/photos/1170412/pexels-photo-1170412.jpeg?auto=compress&cs=tinysrgb&w=600',
+            mediaUrl: '/assets/videos/dance.mp4',
             platform: 'tiktok',
             type: 'video',
             isSelected: true,
@@ -148,7 +148,7 @@ const ContentBranches = () => {
                     parentId: '6',
                     name: 'Urgency Reel',
                     caption: 'Do not miss this! ⏰',
-                    mediaUrl: 'https://images.pexels.com/photos/5632397/pexels-photo-5632397.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    mediaUrl: '/assets/videos/test_mixkit.mp4',
                     platform: 'instagram',
                     type: 'video',
                     isSelected: true,
@@ -184,9 +184,9 @@ const ContentBranches = () => {
             id: '8',
             name: 'Employee Spotlight',
             caption: 'Meet Alex, our lead designer! 🎨',
-            mediaUrl: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=600',
+            mediaUrl: '/assets/videos/kids.mp4',
             platform: 'instagram',
-            type: 'image',
+            type: 'video',
             isSelected: true,
             depth: 0,
             children: []
@@ -195,9 +195,9 @@ const ContentBranches = () => {
             id: '9',
             name: 'Weekend Vibes',
             caption: 'Logging off. See you Monday! ✌️',
-            mediaUrl: 'https://images.pexels.com/photos/1054974/pexels-photo-1054974.jpeg?auto=compress&cs=tinysrgb&w=600',
+            mediaUrl: '/assets/videos/travel.mp4',
             platform: 'instagram',
-            type: 'image',
+            type: 'video',
             isSelected: true,
             depth: 0,
             children: [
@@ -228,7 +228,7 @@ const ContentBranches = () => {
                     parentId: '10',
                     name: 'Talking Head Video',
                     caption: 'Personal branding 101 🧠',
-                    mediaUrl: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=600',
+                    mediaUrl: '/assets/videos/art.mp4',
                     platform: 'tiktok',
                     type: 'video',
                     isSelected: true,
@@ -298,10 +298,32 @@ const ContentBranches = () => {
                     {/* Branch Card */}
                     <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                         <div className="flex">
-                            {/* Media Thumbnail (if exists) */}
+                            {/* Media Thumbnail/Player */}
                             {branch.mediaUrl ? (
-                                <div className="w-32 h-32 bg-gray-100 flex-shrink-0">
-                                    <img src={branch.mediaUrl} alt={branch.name} className="w-full h-full object-cover" />
+                                <div className="w-32 h-32 bg-gray-900 flex-shrink-0 relative group/media">
+                                    {branch.type === 'video' ? (
+                                        <div className="w-full h-full relative">
+                                            <video
+                                                src={branch.mediaUrl}
+                                                className="w-full h-full object-cover"
+                                                muted
+                                                loop
+                                                playsInline
+                                                onMouseOver={(e) => e.currentTarget.play()}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.pause();
+                                                    e.currentTarget.currentTime = 0;
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover/media:opacity-0 transition-opacity">
+                                                <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+                                                    <Video className="w-4 h-4 text-white" fill="white" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <img src={branch.mediaUrl} alt={branch.name} className="w-full h-full object-cover" />
+                                    )}
                                 </div>
                             ) : (
                                 <div className="w-32 h-32 bg-gradient-to-br from-indigo-50 to-slate-50 flex items-center justify-center flex-shrink-0 border-r border-gray-100">

@@ -2,6 +2,8 @@ export interface Post {
     id: string;
     content: string;
     image?: string;
+    mediaUrl?: string;
+    mediaType?: 'image' | 'video';
     platform: 'instagram' | 'threads' | 'tiktok';
     likes: number;
     comments: number | Comment[]; // Allow number for mock data compatibility
@@ -38,10 +40,12 @@ export interface Message {
 
 export interface Task {
     id: string;
-    type: 'plan_content' | 'generate_media' | 'post_content' | 'check_dms' | 'reply_dm' | 'idle';
+    type: 'plan_content' | 'generate_media' | 'post_content' | 'check_dms' | 'reply_dm' | 'reply_comment' | 'idle';
     status: 'pending' | 'in_progress' | 'completed' | 'failed';
     description: string;
     metadata?: Record<string, unknown>;
+    createdAt: number;
+    completedAt?: number;
 }
 
 export interface PlannedPost {
@@ -89,6 +93,7 @@ export interface AgentState {
     posts: Post[];
     messages: Message[];
     logs: Log[];
+    chatHistory: ChatMessage[];
 }
 
 export interface PostConfig {
@@ -107,4 +112,12 @@ export interface WorkflowConfig {
     contentSource: 'upload' | 'ai_generated';
     uploadedFiles?: File[];
     individualPosts?: PostConfig[];
+}
+
+export interface ChatMessage {
+    id: string;
+    role: 'user' | 'agent' | 'system';
+    content: string;
+    timestamp: number;
+    attachments?: string[];
 }

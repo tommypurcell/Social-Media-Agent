@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from '../sidebar/Sidebar';
-import FeedbackLoop from '../feedback/FeedbackLoop';
+import AgentChat from '../agent/AgentChat';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -19,9 +19,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 {children}
             </main>
 
-            {/* Feedback Loop - Right, Medium */}
+            {/* Agent Chat Interface - Right, Persistent (Third Column) */}
             <aside className="w-80 flex-shrink-0 border-l border-border bg-surface z-10 hidden xl:flex flex-col">
-                <FeedbackLoop />
+                <AgentChat />
             </aside>
         </div>
     );
