@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GitBranch, CheckCircle2, Circle, ArrowRight, Sparkles, Eye, Heart, Share2 } from 'lucide-react';
+import { GitBranch, CheckCircle2, Sparkles, Eye } from 'lucide-react';
 
 interface BranchNode {
     id: string;
@@ -89,7 +89,7 @@ const ContentBranches = () => {
         setBranches(updateBranches(branches));
     };
 
-    const renderBranch = (branch: BranchNode, isLast: boolean = false) => {
+    const renderBranch = (branch: BranchNode) => {
         const hasChildren = branch.children.length > 0;
         const selectedCount = countSelected(branch);
 
@@ -105,22 +105,20 @@ const ContentBranches = () => {
                     {/* Selection Checkbox */}
                     <button
                         onClick={() => toggleSelection(branch.id)}
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                            branch.isSelected
+                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${branch.isSelected
                                 ? 'bg-green-500 border-green-500'
                                 : 'border-gray-300 hover:border-green-400'
-                        }`}
+                            }`}
                     >
                         {branch.isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
                     </button>
 
                     {/* Branch Card */}
                     <div
-                        className={`flex-1 bg-white rounded-xl border-2 transition-all ${
-                            branch.isSelected
+                        className={`flex-1 bg-white rounded-xl border-2 transition-all ${branch.isSelected
                                 ? 'border-green-400 shadow-lg shadow-green-100'
                                 : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                            }`}
                     >
                         <div className="p-4">
                             <div className="flex items-start gap-4">
@@ -173,8 +171,8 @@ const ContentBranches = () => {
                 {/* Children */}
                 {hasChildren && (
                     <div className="relative">
-                        {branch.children.map((child, index) =>
-                            renderBranch(child, index === branch.children.length - 1)
+                        {branch.children.map((child) =>
+                            renderBranch(child)
                         )}
                     </div>
                 )}

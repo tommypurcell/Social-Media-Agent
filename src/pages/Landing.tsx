@@ -161,44 +161,51 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Main Features Grid */}
-            <section id="features" className="py-24 bg-white relative">
-                <div className="max-w-7xl mx-auto px-6">
+            {/* Main Features Grid - DARK THEME */}
+            <section id="features" className="py-24 bg-slate-900 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+                <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center max-w-2xl mx-auto mb-20">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Everything you need to scale</h2>
-                        <p className="text-lg text-slate-600">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything you need to scale</h2>
+                        <p className="text-lg text-slate-400">
                             Stop wrestling with complex tools. Connectivity integrates every step of your workflow into one seamless AI-driven experience.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <FeatureCard
-                            icon={<Layers className="w-8 h-8 text-indigo-600" />}
+                            theme="dark"
+                            icon={<Layers className="w-8 h-8 text-indigo-400" />}
                             title="Multi-Channel Workflow"
                             description="Manage Instagram, Threads, TikTok, and more from a single, unified dashboard."
                         />
                         <FeatureCard
-                            icon={<Sparkles className="w-8 h-8 text-violet-600" />}
+                            theme="dark"
+                            icon={<Sparkles className="w-8 h-8 text-violet-400" />}
                             title="AI Content Generation"
                             description="Generate high-quality captions, hashtags, and visual ideas instantly with our advanced AI models."
                         />
                         <FeatureCard
-                            icon={<BarChart3 className="w-8 h-8 text-purple-600" />}
+                            theme="dark"
+                            icon={<BarChart3 className="w-8 h-8 text-purple-400" />}
                             title="Real-time Analytics"
                             description="Track performance metrics and audience engagement to optimize your strategy automatically."
                         />
                         <FeatureCard
-                            icon={<Calendar className="w-8 h-8 text-pink-600" />}
+                            theme="dark"
+                            icon={<Calendar className="w-8 h-8 text-pink-400" />}
                             title="Smart Scheduling"
                             description="Let AI determine the best times to post for maximum reach and engagement."
                         />
                         <FeatureCard
-                            icon={<MessageCircle className="w-8 h-8 text-orange-600" />}
+                            theme="dark"
+                            icon={<MessageCircle className="w-8 h-8 text-orange-400" />}
                             title="Unified Inbox"
                             description="Reply to comments and messages across all platforms in one centralized place."
                         />
                         <FeatureCard
-                            icon={<Zap className="w-8 h-8 text-teal-600" />}
+                            theme="dark"
+                            icon={<Zap className="w-8 h-8 text-teal-400" />}
                             title="Automated Actions"
                             description="Set up workflows to automatically follow up, repost, or curate content."
                         />
@@ -206,16 +213,16 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Testimonials Section */}
-            <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-                {/* Background Detail */}
-                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl"></div>
+            {/* Testimonials Section - COLORFUL THEME */}
+            <section className="py-24 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-white relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light"></div>
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="text-center max-w-2xl mx-auto mb-16">
                         <h2 className="text-3xl font-bold mb-4">Loved by creators worldwide</h2>
-                        <p className="text-slate-400 text-lg">Don't just take our word for it. Here's what our community has to say.</p>
+                        <p className="text-indigo-100 text-lg">Don't just take our word for it. Here's what our community has to say.</p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-6">
@@ -224,24 +231,27 @@ const Landing = () => {
                             author="Sarah Jenkins"
                             role="Lifestyle Creator"
                             image="https://i.pravatar.cc/100?img=5"
+                            theme="colorful"
                         />
                         <TestimonialCard
                             quote="The AI content generation is scarily good. It captures my tone perfectly every single time."
                             author="Marcus Chen"
                             role="Digital Artist"
                             image="https://i.pravatar.cc/100?img=11"
+                            theme="colorful"
                         />
                         <TestimonialCard
                             quote="Finally, a tool that actually handles multi-platform scheduling without glitching. A game changer."
                             author="Elena Rodriguez"
                             role="Marketing Agency Owner"
                             image="https://i.pravatar.cc/100?img=9"
+                            theme="colorful"
                         />
                     </div>
                 </div>
             </section>
 
-            {/* Preview Section */}
+            {/* Preview Section - LIGHT THEME */}
             <section className="py-24 bg-white overflow-hidden relative border-t border-slate-100">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -286,20 +296,20 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-white py-12 border-t border-slate-100">
+            {/* Footer - DARK THEME */}
+            <footer className="bg-slate-950 py-12 border-t border-slate-800 text-slate-400">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-slate-900 flex items-center justify-center text-white text-xs font-bold">C</div>
-                        <span className="font-semibold text-slate-900">Connectivity</span>
+                        <div className="w-6 h-6 rounded bg-white flex items-center justify-center text-slate-950 text-xs font-bold">C</div>
+                        <span className="font-semibold text-white">Connectivity</span>
                     </div>
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm">
                         © 2024 Connectivity Inc. All rights reserved.
                     </div>
                     <div className="flex gap-6">
-                        <a href="#" className="text-slate-400 hover:text-slate-900 transition-colors">Twitter</a>
-                        <a href="#" className="text-slate-400 hover:text-slate-900 transition-colors">LinkedIn</a>
-                        <a href="#" className="text-slate-400 hover:text-slate-900 transition-colors">Instagram</a>
+                        <a href="#" className="hover:text-white transition-colors">Twitter</a>
+                        <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+                        <a href="#" className="hover:text-white transition-colors">Instagram</a>
                     </div>
                 </div>
             </footer>
@@ -315,13 +325,21 @@ const Landing = () => {
     );
 };
 
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-    <div className="p-8 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 group">
-        <div className="mb-6 inline-block p-3 rounded-xl bg-slate-50 group-hover:bg-indigo-50 transition-colors">
+const FeatureCard = ({ icon, title, description, theme = 'light' }: { icon: React.ReactNode, title: string, description: string, theme?: 'light' | 'dark' }) => (
+    <div className={`p-8 rounded-2xl border shadow-sm transition-all duration-300 group
+        ${theme === 'dark'
+            ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-800 hover:border-indigo-500/50 hover:shadow-indigo-500/10'
+            : 'bg-white border-slate-100 hover:shadow-xl hover:border-indigo-100'
+        }`}>
+        <div className={`mb-6 inline-block p-3 rounded-xl transition-colors
+            ${theme === 'dark' ? 'bg-slate-800 group-hover:bg-slate-700' : 'bg-slate-50 group-hover:bg-indigo-50'}`}>
             {icon}
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">{title}</h3>
-        <p className="text-slate-600 leading-relaxed">{description}</p>
+        <h3 className={`text-xl font-bold mb-3 transition-colors
+            ${theme === 'dark' ? 'text-white group-hover:text-indigo-400' : 'text-slate-900 group-hover:text-indigo-600'}`}>
+            {title}
+        </h3>
+        <p className={`leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{description}</p>
     </div>
 );
 
@@ -342,19 +360,23 @@ const UseCaseCard = ({ icon, title, description, tags }: { icon: React.ReactNode
     </div>
 );
 
-const TestimonialCard = ({ quote, author, role, image }: { quote: string, author: string, role: string, image: string }) => (
-    <div className="p-8 rounded-2xl bg-slate-800 border border-slate-700 relative">
-        <div className="text-indigo-500 mb-4">
+const TestimonialCard = ({ quote, author, role, image, theme = 'dark' }: { quote: string, author: string, role: string, image: string, theme?: 'dark' | 'colorful' }) => (
+    <div className={`p-8 rounded-2xl border relative
+        ${theme === 'colorful'
+            ? 'bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15'
+            : 'bg-slate-800 border-slate-700'
+        }`}>
+        <div className={`${theme === 'colorful' ? 'text-indigo-200' : 'text-indigo-500'} mb-4`}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z" />
             </svg>
         </div>
-        <p className="text-slate-300 text-lg mb-6 leading-relaxed italic">"{quote}"</p>
+        <p className={`${theme === 'colorful' ? 'text-white' : 'text-slate-300'} text-lg mb-6 leading-relaxed italic`}>"{quote}"</p>
         <div className="flex items-center gap-3">
             <img src={image} alt={author} className="w-10 h-10 rounded-full bg-slate-700" />
             <div>
                 <div className="font-semibold text-white">{author}</div>
-                <div className="text-sm text-slate-500">{role}</div>
+                <div className={`${theme === 'colorful' ? 'text-indigo-200' : 'text-slate-500'} text-sm`}>{role}</div>
             </div>
         </div>
     </div>
