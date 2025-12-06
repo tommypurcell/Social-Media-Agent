@@ -1,9 +1,25 @@
 
-import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone } from 'lucide-react';
+import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone, CheckCircle } from 'lucide-react';
 import { cn } from '../../lib/utils'; // Assuming I will create a utils file for clsx/tailwind-merge
 import { NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { tokenStorage } from '../../services/tokenStorage';
 
 const Sidebar = () => {
+    const [connectedCount, setConnectedCount] = useState(0);
+
+    useEffect(() => {
+        const checkConnections = () => {
+            const connected = tokenStorage.getConnectedPlatforms();
+            setConnectedCount(connected.length);
+        };
+
+        checkConnections();
+        // Check every 5 seconds
+        const interval = setInterval(checkConnections, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
     const navItems = [
         { icon: LayoutDashboard, label: 'Monitor', path: '/' },
         { icon: Smartphone, label: 'Sample Feed', path: '/feed' },
@@ -42,11 +58,22 @@ const Sidebar = () => {
             </nav>
 
             <div className="mt-auto pt-4 border-t border-border space-y-2">
+                {connectedCount > 0 && (
+                    <div className="px-3 py-2 mb-2 bg-green-50 border border-green-200 rounded-lg hidden lg:block">
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <div>
+                                <p className="text-xs font-medium text-green-900">{connectedCount} Account{connectedCount !== 1 ? 's' : ''} Connected</p>
+                                <p className="text-xs text-green-600">Ready to post</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <NavLink
                     to="/settings"
                     className={({ isActive }) =>
                         cn(
-                            "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                            "flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative",
                             isActive
                                 ? "bg-accent/10 text-accent font-medium"
                                 : "text-secondary hover:bg-gray-50 hover:text-primary"
@@ -55,6 +82,9 @@ const Sidebar = () => {
                 >
                     <Settings className="w-5 h-5 flex-shrink-0" />
                     <span className="ml-3 hidden lg:block">Settings</span>
+                    {connectedCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white lg:hidden"></span>
+                    )}
                 </NavLink>
                 <div className="flex items-center px-3 py-2.5 text-secondary hover:text-primary cursor-pointer">
                     <UserCircle className="w-8 h-8 flex-shrink-0 text-gray-400" />

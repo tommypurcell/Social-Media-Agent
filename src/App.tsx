@@ -7,6 +7,8 @@ import Planner from './pages/Planner';
 import Reports from './pages/Reports';
 import WorkflowPlanner from './pages/WorkflowPlanner';
 import SampleFeedPage from './pages/SampleFeedPage';
+import Settings from './pages/Settings';
+import AuthCallback from './pages/AuthCallback';
 import { AgentProvider } from './lib/AgentContext';
 import { OnboardingModal } from './components/onboarding/OnboardingModal';
 import { useOnboarding } from './hooks/useOnboarding';
@@ -29,6 +31,8 @@ function App() {
             <Route path="/planner" element={<Planner />} />
             <Route path="/workflow-planner" element={<WorkflowPlanner />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </MainLayout>
