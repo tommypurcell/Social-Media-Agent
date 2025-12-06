@@ -1,11 +1,26 @@
 import type { Post } from '../lib/types';
-import { Instagram, Heart, MessageCircle, Send, Music } from 'lucide-react';
+import { Instagram, Heart, MessageCircle, Music, Eye, Share2, Bookmark } from 'lucide-react';
+import { useState } from 'react';
 
 interface FeedProps {
     posts: Post[];
 }
 
 export function Feed({ posts }: FeedProps) {
+    const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+
+    const toggleComments = (postId: string) => {
+        setExpandedComments(prev => {
+            const next = new Set(prev);
+            if (next.has(postId)) {
+                next.delete(postId);
+            } else {
+                next.add(postId);
+            }
+            return next;
+        });
+    };
+
     // Determine platform from first post or default to instagram
     const platform = posts.length > 0 ? posts[0].platform : 'instagram';
 
@@ -46,29 +61,135 @@ export function Feed({ posts }: FeedProps) {
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-100">
-                        {posts.map((post) => (
-                            <div key={post.id} className="pb-4 animate-in fade-in duration-500">
-                                {post.image && (
-                                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
-                                        <img src={post.image} alt="Post" className="w-full h-full object-cover" />
+                        {posts.map((post) => {
+                            const engagement = post.engagement || {
+                                views: post.likes ? post.likes * 10 : 0,
+                                likes: post.likes || 0,
+                                comments: post.comments || 0,
+                                shares: Math.floor((post.likes || 0) * 0.1),
+                                saves: Math.floor((post.likes || 0) * 0.2)
+                            };
+                            const simulatedComments = post.simulatedComments || [];
+                            const isCommentsExpanded = expandedComments.has(post.id);
+                            const postPlatform = post.platform || 'instagram';
+
+                            return (
+                                <div key={post.id} className="pb-4 animate-in fade-in duration-500">
+                                    {/* Post Header */}
+                                    <div className="px-4 py-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                                                <span className="text-white font-bold text-xs">M</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold">marathon_agent</p>
+                                                <p className="text-xs text-gray-500 capitalize">{postPlatform}</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs text-gray-400">
+                                            {new Date(post.timestamp).toLocaleTimeString()}
+                                        </span>
                                     </div>
-                                )}
-                                <div className="px-4 pt-3">
-                                    <div className="flex gap-3 mb-2">
-                                        <Heart className="w-6 h-6 text-gray-800 hover:text-red-500 cursor-pointer" />
-                                        <MessageCircle className="w-6 h-6 text-gray-800" />
-                                        <Send className="w-6 h-6 text-gray-800" />
+
+                                    {/* Post Media */}
+                                    {post.image && (
+                                        <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                                            <img src={post.image} alt="Post" className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+
+                                    {/* Engagement Actions */}
+                                    <div className="px-4 pt-3">
+                                        <div className="flex gap-4 mb-3">
+                                            <button className="flex items-center gap-1 text-gray-700 hover:text-red-500 transition-colors">
+                                                <Heart className="w-6 h-6" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleComments(post.id)}
+                                                className="flex items-center gap-1 text-gray-700 hover:text-blue-500 transition-colors"
+                                            >
+                                                <MessageCircle className="w-6 h-6" />
+                                            </button>
+                                            <button className="flex items-center gap-1 text-gray-700 hover:text-green-500 transition-colors">
+                                                <Share2 className="w-6 h-6" />
+                                            </button>
+                                            <button className="flex items-center gap-1 text-gray-700 hover:text-yellow-500 transition-colors ml-auto">
+                                                <Bookmark className="w-6 h-6" />
+                                            </button>
+                                        </div>
+
+                                        {/* Engagement Stats */}
+                                        <div className="flex items-center gap-4 mb-2 text-xs text-gray-600">
+                                            {engagement.views > 0 && (
+                                                <div className="flex items-center gap-1">
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <span>{engagement.views.toLocaleString()}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex items-center gap-1">
+                                                <Heart className="w-3.5 h-3.5" />
+                                                <span className="font-semibold">{engagement.likes.toLocaleString()} likes</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <MessageCircle className="w-3.5 h-3.5" />
+                                                <span>{typeof engagement.comments === 'number' ? engagement.comments : engagement.comments.length} comments</span>
+                                            </div>
+                                            {engagement.shares > 0 && (
+                                                <div className="flex items-center gap-1">
+                                                    <Share2 className="w-3.5 h-3.5" />
+                                                    <span>{engagement.shares} shares</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Caption */}
+                                        <p className="text-sm text-gray-800 mb-2">
+                                            <span className="font-semibold mr-1">marathon_agent</span>
+                                            {post.content}
+                                        </p>
+
+                                        {/* Comments Section */}
+                                        {simulatedComments.length > 0 && (
+                                            <div className="mt-3">
+                                                <button
+                                                    onClick={() => toggleComments(post.id)}
+                                                    className="text-xs text-gray-500 hover:text-gray-700 mb-2"
+                                                >
+                                                    {isCommentsExpanded
+                                                        ? 'Hide comments'
+                                                        : `View all ${simulatedComments.length} comments`
+                                                    }
+                                                </button>
+
+                                                {isCommentsExpanded && (
+                                                    <div className="space-y-2 mt-2 pl-2 border-l-2 border-gray-200 max-h-48 overflow-y-auto">
+                                                        {simulatedComments.map((comment) => (
+                                                            <div key={comment.id} className="text-sm">
+                                                                <p>
+                                                                    <span className="font-semibold text-gray-800 mr-1">
+                                                                        {comment.username}
+                                                                    </span>
+                                                                    <span className="text-gray-700">{comment.text}</span>
+                                                                </p>
+                                                                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                                                                    <span>
+                                                                        {Math.floor((Date.now() - new Date(comment.timestamp).getTime()) / 60000)}m
+                                                                    </span>
+                                                                    {comment.likes > 0 && (
+                                                                        <span>{comment.likes} likes</span>
+                                                                    )}
+                                                                    <button className="hover:text-gray-700">Reply</button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    <p className="text-sm text-gray-800">
-                                        <span className="font-semibold mr-2">agent_007</span>
-                                        {post.content}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1 uppercase">
-                                        {new Date(post.timestamp).toLocaleTimeString()}
-                                    </p>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

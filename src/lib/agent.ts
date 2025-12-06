@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { AgentState, Task, Log, WorkflowConfig } from './types';
 import { api } from './api';
+import { mockSocialMedia } from '../services/mockSocialMedia';
 
 const INITIAL_STATE: AgentState = {
     isActive: false,
@@ -93,11 +94,48 @@ export function useAgent() {
             }
 
             case 'post_content': {
-                const content = task.description.split(": ")[1];
-                const metadata = task.metadata as { imageUrl?: string } | undefined;
-                const postImage = metadata?.imageUrl || "https://placehold.co/600x400";
-                const post = await api.postToInstagram(content, postImage);
-                addLog(`Posted to Instagram: ${post.id}`, 'success');
+                const content = task.description.split(": ")[1] || task.description;
+                const metadata = task.metadata as {
+                    imageUrl?: string;
+                    caption?: string;
+                    platform?: 'instagram' | 'tiktok' | 'threads';
+                    mediaType?: 'image' | 'video';
+                    uploadedMedia?: string;
+                } | undefined;
+
+                const platform = metadata?.platform || 'instagram';
+                const caption = metadata?.caption || content;
+                const mediaUrl = metadata?.uploadedMedia || metadata?.imageUrl || "https://placehold.co/600x400";
+                const mediaType = metadata?.mediaType || 'image';
+
+                addLog(`Posting to ${platform}...`, 'info');
+
+                // Use mock social media service for simulated posting
+                const simulatedPost = await mockSocialMedia.simulatePost(
+                    platform,
+                    caption,
+                    mediaUrl,
+                    mediaType
+                );
+
+                addLog(`✅ Posted to ${platform}: ${simulatedPost.engagement.views} views, ${simulatedPost.engagement.likes} likes`, 'success');
+
+                // Convert simulated post to our post format and add to state
+                const post = {
+                    id: simulatedPost.id,
+                    content: simulatedPost.caption,
+                    image: simulatedPost.mediaUrl || '',
+                    timestamp: simulatedPost.timestamp.getTime(),
+                    likes: simulatedPost.engagement.likes,
+                    comments: simulatedPost.engagement.comments,
+                    platform: simulatedPost.platform,
+                    engagement: simulatedPost.engagement,
+                    simulatedComments: simulatedPost.comments.map(c => ({
+                        ...c,
+                        timestamp: c.timestamp.toISOString()
+                    }))
+                };
+
                 setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
                 break;
             }

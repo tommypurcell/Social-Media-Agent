@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ArrowRight, BarChart3, Calendar, Layers, Sparkles, Zap, MessageCircle, CheckCircle } from 'lucide-react';
 import { OnboardingModal } from '../components/onboarding/OnboardingModal';
+import { VideoMarquee } from '../components/landing/VideoMarquee';
 import { useOnboarding, type OnboardingData } from '../hooks/useOnboarding';
 import { useNavigate } from 'react-router-dom';
 
@@ -51,30 +52,38 @@ const Landing = () => {
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-50/50 to-transparent -z-10" />
                 <div className="absolute top-20 right-20 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl -z-10 animate-pulse" />
 
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="max-w-3xl">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wide mb-6">
+                <div className="max-w-7xl mx-auto px-6 relative">
+                    {/* Video Marquee Container - Positioned as a dynamic background layer */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[50%] h-[800px] hidden xl:block overflow-hidden pointer-events-none fade-mask z-0 opacity-80">
+                        <div className="rotate-y-12 transform-3d scale-110">
+                            <VideoMarquee />
+                        </div>
+                    </div>
+
+                    <div className="max-w-3xl relative z-10 bg-white/30 backdrop-blur-[2px] rounded-3xl p-6 -ml-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wide mb-6 shadow-sm">
                             <Sparkles className="w-3 h-3" />
                             <span>AI-Powered Social Media Management</span>
                         </div>
-                        <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] mb-8">
+                        <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] mb-8 drop-shadow-sm">
                             The future of <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600">
                                 effortless growth.
                             </span>
                         </h1>
-                        <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl">
+                        <p className="text-xl text-slate-700 mb-10 leading-relaxed max-w-2xl font-medium drop-shadow-sm bg-white/50 backdrop-blur-sm rounded-xl p-2 -ml-2">
                             Connectivity is your autonomous AI marketing agent. Plan, create, and optimize your social media presence across platforms with zero friction.
                         </p>
+
                         <div className="flex flex-col sm:flex-row gap-4">
                             <button
                                 onClick={() => setShowOnboarding(true)}
-                                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-indigo-600 text-white font-semibold text-lg hover:bg-indigo-700 transition-all hover:shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5"
+                                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-indigo-600 text-white font-semibold text-lg hover:bg-indigo-700 transition-all hover:shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5 shadow-md"
                             >
                                 Get Started Free
                                 <ArrowRight className="ml-2 w-5 h-5" />
                             </button>
-                            <button className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold text-lg hover:bg-slate-50 transition-all">
+                            <button className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold text-lg hover:bg-slate-50 transition-all shadow-sm">
                                 View Demo
                             </button>
                         </div>

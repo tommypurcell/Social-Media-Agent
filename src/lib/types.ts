@@ -2,9 +2,23 @@ export interface Post {
     id: string;
     content: string;
     image?: string;
-    platform: 'instagram' | 'threads';
+    platform: 'instagram' | 'threads' | 'tiktok';
     likes: number;
-    comments: Comment[];
+    comments: number | Comment[]; // Allow number for mock data compatibility
+    engagement?: {
+        views: number;
+        likes: number;
+        comments: number;
+        shares: number;
+        saves?: number;
+    };
+    simulatedComments?: {
+        id: string;
+        username: string;
+        text: string;
+        timestamp: string;
+        likes: number;
+    }[];
     timestamp: number;
 }
 

@@ -33,11 +33,10 @@ const SampleFeedPage = () => {
                                 <button
                                     key={platform.id}
                                     onClick={() => setSelectedPlatform(platform.id)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all ${
-                                        isSelected
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all ${isSelected
                                             ? 'bg-orange-100 text-orange-700 shadow-sm'
                                             : 'text-secondary hover:bg-gray-50'
-                                    }`}
+                                        }`}
                                 >
                                     <Icon className="w-4 h-4" />
                                     {platform.name}
@@ -59,7 +58,7 @@ const SampleFeedPage = () => {
                         <span>•</span>
                         <span>{filteredPosts.reduce((sum, p) => sum + p.likes, 0)} total likes</span>
                         <span>•</span>
-                        <span>{filteredPosts.reduce((sum, p) => sum + p.comments.length, 0)} total comments</span>
+                        <span>{filteredPosts.reduce((sum, p) => sum + (typeof p.comments === 'number' ? p.comments : p.comments.length), 0)} total comments</span>
                     </div>
                 )}
 
