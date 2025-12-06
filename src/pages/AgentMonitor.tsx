@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAgentContext } from '../lib/AgentContext';
-import { Activity, Clock, FileVideo, CheckCircle2, AlertCircle, Play, Sparkles, Target, Upload, Image } from 'lucide-react';
+import { Activity, Clock, FileVideo, CheckCircle2, AlertCircle, Play, Sparkles, Target } from 'lucide-react';
 import { NewWorkflowModal } from '../components/NewWorkflowModal';
 import type { WorkflowConfig, PlannedPost } from '../lib/types';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -12,10 +12,7 @@ const AgentMonitor = () => {
     const { state, addTask, toggleAgent } = useAgentContext();
     const { onboardingData } = useOnboarding();
     const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-    const [isProcessingUpload, setIsProcessingUpload] = useState(false);
     const processedRef = useRef(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Handle return from Workflow Planner
     useEffect(() => {
@@ -50,57 +47,6 @@ const AgentMonitor = () => {
     const handleStartWorkflow = (config: WorkflowConfig) => {
         console.log('Starting workflow with config:', config);
         navigate('/workflow-planner', { state: { config } });
-    };
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
-
-        const filesArray = Array.from(files);
-        setUploadedFiles(filesArray);
-        setIsProcessingUpload(true);
-
-        // Create object URLs for preview
-        const fileURLs = filesArray.map(file => URL.createObjectURL(file));
-
-        // Automatically create posts for each uploaded file
-        const platform = onboardingData?.platforms[0] || 'instagram';
-
-        // Simulate processing delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        filesArray.forEach((file, index) => {
-            const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-            const caption = `Check out this amazing ${mediaType === 'video' ? 'video' : 'photo'}! 📸✨`;
-
-            addTask(
-                `Post ${mediaType} to ${platform}`,
-                'post_content',
-                {
-                    platform: platform as 'instagram' | 'tiktok' | 'threads',
-                    caption: caption,
-                    mediaType: mediaType,
-                    uploadedMedia: fileURLs[index],
-                }
-            );
-        });
-
-        // Auto-start the agent
-        if (!state.isActive) {
-            toggleAgent();
-        }
-
-        setIsProcessingUpload(false);
-
-        // Clean up file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-
-        // Cleanup URLs after 5 minutes
-        setTimeout(() => {
-            fileURLs.forEach(url => URL.revokeObjectURL(url));
-        }, 5 * 60 * 1000);
     };
 
     // Map real tasks to UI format
@@ -302,44 +248,7 @@ const AgentMonitor = () => {
                     </div>
                 ))}
 
-                {/* Quick Upload Card */}
-                <div className="bg-gradient-to-br from-orange-50 to-purple-50 rounded-xl border-2 border-dashed border-orange-200 flex flex-col items-center justify-center p-8 hover:border-orange-400 hover:shadow-lg transition-all min-h-[300px] relative group">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        accept="image/*,video/*"
-                        onChange={handleFileUpload}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        disabled={isProcessingUpload}
-                    />
-
-                    {isProcessingUpload ? (
-                        <div className="flex flex-col items-center">
-                            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-4">
-                                <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
-                            </div>
-                            <h3 className="font-semibold text-lg text-gray-900 mb-1">Processing...</h3>
-                            <p className="text-gray-600 text-center max-w-xs text-sm">Creating posts from your uploads</p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                <Upload className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="font-semibold text-lg text-gray-900 mb-1">Quick Upload</h3>
-                            <p className="text-gray-600 text-center max-w-xs text-sm mb-3">
-                                Drop photos or videos here to instantly create posts
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                                <Image className="w-4 h-4" />
-                                <span>Images & Videos supported</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Advanced Workflow Button */}
+                {/* Upload New Card */}
                 <div
                     onClick={() => setIsWorkflowModalOpen(true)}
                     className="bg-surface rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 hover:border-accent hover:bg-accent/5 transition-all cursor-pointer min-h-[300px]"
@@ -347,8 +256,8 @@ const AgentMonitor = () => {
                     <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
                         <FileVideo className="w-8 h-8 text-accent" />
                     </div>
-                    <h3 className="font-semibold text-lg text-primary mb-1">Advanced Workflow</h3>
-                    <p className="text-secondary text-center max-w-xs text-sm">Customize platforms, captions, and scheduling with full control</p>
+                    <h3 className="font-semibold text-lg text-primary mb-1">New Workflow</h3>
+                    <p className="text-secondary text-center max-w-xs text-sm">Upload raw video & prompts. The Agent will handle the rest.</p>
                 </div>
 
             </div>

@@ -58,6 +58,21 @@ export interface PlannedPost {
     scheduledTime: string;
     status: 'planning' | 'planned' | 'error';
     uploadedImage?: string; // URL for uploaded file
+    workflowId?: string; // Links all posts from same workflow
+    branches?: ContentBranch[]; // Different versions of this post
+}
+
+export interface ContentBranch {
+    id: string;
+    parentId?: string; // null for root, otherwise points to parent branch
+    name: string;
+    caption: string;
+    hashtags: string[];
+    mediaUrl?: string;
+    platform: string;
+    postType: 'photo' | 'reel';
+    isSelected: boolean; // Whether this branch is selected for publishing
+    createdAt: number;
 }
 
 export interface Log {

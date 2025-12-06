@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Wand2, Calendar, Loader2, Sparkles } from 'lucide-react';
 import type { WorkflowConfig, PlannedPost } from '../lib/types';
+import { generateMedia, generateCaption } from '../services/mediaGenerator';
 
 const WorkflowPlanner = () => {
     const navigate = useNavigate();
@@ -14,22 +15,46 @@ const WorkflowPlanner = () => {
 
     const generatePostContent = async (post: PlannedPost): Promise<Partial<PlannedPost>> => {
         const platformStyles = {
-            instagram: { captionStyle: 'Visual storytelling with emojis', hashtagCount: 10 },
-            tiktok: { captionStyle: 'Short, punchy, trending', hashtagCount: 5 },
-            threads: { captionStyle: 'Conversational and authentic', hashtagCount: 3 },
+            instagram: { hashtagCount: 10 },
+            tiktok: { hashtagCount: 5 },
+            threads: { hashtagCount: 3 },
         };
 
         const style = platformStyles[post.platform as keyof typeof platformStyles] || platformStyles.instagram;
         const hour = 9 + (post.id - 1) * 2;
         const time = `${hour.toString().padStart(2, '0')}:00`;
 
+        // Generate media if not uploaded
+        let generatedImageUrl: string | undefined;
+        if (!post.uploadedImage) {
+            try {
+                const mediaType = post.postType === 'reel' ? 'video' : 'image';
+                const media = await generateMedia(post.topic, post.platform, mediaType);
+                generatedImageUrl = media.url;
+                console.log(`Generated ${mediaType} for "${post.topic}":`, media.url);
+            } catch (error) {
+                console.error('Error generating media:', error);
+            }
+        }
+
+        // Generate AI caption
+        let aiCaption: string;
+        try {
+            const mediaType = post.postType === 'reel' ? 'video' : 'image';
+            aiCaption = await generateCaption(post.topic, post.platform, mediaType);
+        } catch (error) {
+            console.error('Error generating caption:', error);
+            aiCaption = `Check out this amazing content about ${post.topic}! 🚀✨`;
+        }
+
         return {
-            caption: `${post.topic} - Engaging ${style.captionStyle} content that resonates with our audience. Ready to make an impact! 🚀`,
+            caption: aiCaption,
             hashtags: Array.from({ length: style.hashtagCount }, (_, i) =>
                 `#${post.topic.replace(/\s+/g, '')}${i > 0 ? i + 1 : ''}`
             ),
             imagePrompt: `High-quality ${post.platform} post featuring ${post.topic}, professional lighting, vibrant colors, engaging composition`,
             scheduledTime: time,
+            uploadedImage: post.uploadedImage || generatedImageUrl, // Use generated media if no upload
         };
     };
 
@@ -129,7 +154,7 @@ const WorkflowPlanner = () => {
     };
 
     const handleApprove = () => {
-        navigate('/', {
+        navigate('/contents', {
             state: {
                 plannedPosts,
                 message: 'Workflow planned successfully! Posts queued for execution.'
@@ -228,10 +253,39 @@ const WorkflowPlanner = () => {
                                 {post.status === 'planning' && currentlyPlanning === post.id ? (
                                     <div className="py-12 text-center">
                                         <Wand2 className="w-10 h-10 text-orange-500 mx-auto mb-3 animate-pulse" />
-                                        <p className="text-sm text-secondary">Crafting content...</p>
+                                        <p className="text-sm text-secondary">Generating media and caption...</p>
                                     </div>
                                 ) : post.status === 'planned' ? (
                                     <div className="space-y-4">
+                                        {/* Generated Media Thumbnail Preview */}
+                                        {post.uploadedImage && (
+                                            <div className="mb-4">
+                                                <label className="text-xs font-medium text-secondary mb-1.5 block">Generated Preview</label>
+                                                <div className="relative rounded-lg overflow-hidden border-2 border-green-200 bg-green-50">
+                                                    <img
+                                                        src={post.uploadedImage}
+                                                        alt={`Generated ${post.postType}`}
+                                                        className="w-full h-64 object-cover"
+                                                    />
+                                                    <div className="absolute top-2 right-2">
+                                                        <span className="px-2 py-1 bg-green-600 text-white text-xs font-semibold rounded-md flex items-center gap-1">
+                                                            <CheckCircle2 className="w-3 h-3" />
+                                                            AI Generated
+                                                        </span>
+                                                    </div>
+                                                    {post.postType === 'reel' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                                            <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                                                                <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M8 5v14l11-7z" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Topic & Post Type */}
                                         <div className="grid grid-cols-3 gap-4">
                                             <div>
@@ -328,33 +382,13 @@ const WorkflowPlanner = () => {
                                             )}
                                         </div>
 
-                                        {/* Uploaded Image or Image Prompt */}
-                                        {post.uploadedImage ? (
+                                        {/* AI Prompt Info */}
+                                        {post.imagePrompt && (
                                             <div>
-                                                <label className="text-xs font-medium text-secondary mb-1.5 block">Uploaded Media</label>
-                                                <div className="relative rounded-lg overflow-hidden border border-border">
-                                                    <img
-                                                        src={post.uploadedImage}
-                                                        alt={`Post ${post.id}`}
-                                                        className="w-full h-48 object-cover"
-                                                    />
-                                                    <div className="absolute top-2 right-2">
-                                                        <span className="px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-xs rounded-md">
-                                                            Uploaded
-                                                        </span>
-                                                    </div>
+                                                <label className="text-xs font-medium text-secondary mb-1.5 block">AI Prompt Used</label>
+                                                <div className="px-3 py-2 text-xs rounded-lg border border-border bg-gray-50 text-gray-600 italic">
+                                                    {post.imagePrompt}
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <label className="text-xs font-medium text-secondary mb-1.5 block">Image Generation Prompt</label>
-                                                <textarea
-                                                    value={post.imagePrompt}
-                                                    onChange={(e) => handleEditPost(post.id, 'imagePrompt', e.target.value)}
-                                                    rows={2}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none"
-                                                    placeholder="Describe the image to generate..."
-                                                />
                                             </div>
                                         )}
                                     </div>
