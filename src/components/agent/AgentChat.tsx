@@ -64,18 +64,29 @@ const AgentChat = () => {
                         className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                     >
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user'
-                                ? 'bg-gray-200 text-gray-600'
-                                : 'bg-indigo-100 text-indigo-600'
+                            ? 'bg-gray-200 text-gray-600'
+                            : 'bg-indigo-100 text-indigo-600'
                             }`}>
                             {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                         </div>
 
                         <div className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                             <div className={`px-3 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                                    ? 'bg-primary text-white rounded-tr-none'
-                                    : 'bg-white border border-border text-primary rounded-tl-none'
+                                ? 'bg-primary text-white rounded-tr-none'
+                                : 'bg-white border border-border text-primary rounded-tl-none'
                                 }`}>
                                 {msg.content}
+                                {msg.attachments && msg.attachments.length > 0 && (
+                                    <div className="mt-2 space-y-2">
+                                        {msg.attachments.map((url, i) => (
+                                            url.includes('.mp4') ? (
+                                                <video key={i} src={url} controls className="w-full rounded-lg" />
+                                            ) : (
+                                                <img key={i} src={url} alt="Attachment" className="w-full rounded-lg" />
+                                            )
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <span className="text-[10px] text-gray-400 mt-1 px-1">
                                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

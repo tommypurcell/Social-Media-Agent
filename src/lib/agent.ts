@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { AgentState, Task, Log, WorkflowConfig, Message, ChatMessage } from './types';
 import { api } from './api';
 import { mockSocialMedia } from '../services/mockSocialMedia';
+import { generateMedia, getGeminiChatResponse } from '../services/mediaGenerator';
 
 const INITIAL_STATE: AgentState = {
     isActive: false,
@@ -73,44 +74,66 @@ export function useAgent() {
             chatHistory: [...prev.chatHistory, userMsg]
         }));
 
-        // 2. Simulate Agent Thinking
-        await new Promise(r => setTimeout(r, 600));
-
-        // 3. Analyze & Respond
-        let responseText = "I understand. I'm updating my context.";
+        // 2. Analyze Intent & Respond
+        let responseText = "";
         const lowercaseContent = content.toLowerCase();
+        let attachments: string[] = [];
 
-        if (lowercaseContent.includes('start') && lowercaseContent.includes('agent')) {
+        // Check for Media Generation Intent
+        const mediaMatch = lowercaseContent.match(/(?:make|create|generate|show)\s+(?:a|an)?\s*(video|image|picture|photo)/i);
+
+        if (mediaMatch) {
+            const mediaType = (mediaMatch[1] === 'video') ? 'video' : 'image';
+            // Extract topic: everything after the "make a video" part roughly, or just use the whole message
+            const topic = content.replace(/(?:make|create|generate|show)\s+(?:a|an)?\s*(video|image|picture|photo)(?: of| about| for)?/i, "").trim() || "something cool";
+
+            // Temporary "Thinking" message
+            setState(prev => ({
+                ...prev,
+                chatHistory: [...prev.chatHistory, {
+                    id: 'temp_thinking',
+                    role: 'agent',
+                    content: `Generating ${mediaType} about "${topic}"...`,
+                    timestamp: Date.now()
+                }]
+            }));
+
+            try {
+                const media = await generateMedia(topic, 'instagram', mediaType);
+                attachments = [media.url];
+                responseText = `Here is the ${mediaType} you asked for!`;
+
+                // Also add a task for it so it appears in the timeline
+                addTask(`Generate ${mediaType}: ${topic}`, 'generate_media', { imageUrl: media.url });
+
+            } catch (e) {
+                console.error(e);
+                responseText = "I couldn't generate that media right now. Please try again.";
+            }
+
+            // Remove temp message
+            setState(prev => ({
+                ...prev,
+                chatHistory: prev.chatHistory.filter(m => m.id !== 'temp_thinking')
+            }));
+
+        } else if (lowercaseContent.includes('start') && lowercaseContent.includes('agent')) {
             responseText = "Starting autonomous mode immediately.";
-            // toggleAgent logic - but we can't call toggleAgent directly easily due to closure/dep cycles if we aren't careful?
-            // Actually we can just setState directly or call the function if available. 
-            // Better to just set Active directly here to avoid complex deps.
             setState(prev => ({ ...prev, isActive: true }));
         } else if (lowercaseContent.includes('stop') && lowercaseContent.includes('agent')) {
             responseText = "Stopping all activities. I'm now in standby.";
             setState(prev => ({ ...prev, isActive: false }));
-        } else if (lowercaseContent.includes('plan') && lowercaseContent.includes('post')) {
-            responseText = "I'll queue up a planning task for a new post right away.";
-            addTask("Plan new content based on user chat request", "plan_content");
-        } else if (lowercaseContent.includes('policy') || lowercaseContent.includes('prompt')) {
-            responseText = "I've updated my internal guidelines based on your request. I will follow this new policy for future tasks.";
-            addLog("Policy updated by user interaction", "warning");
         } else {
-            // Generic fallback using simple "AI" response simulation
-            const responses = [
-                "I've noted that. Is there anything specific you'd like me to focus on?",
-                "Understood. I'll adjust my approach accordingly.",
-                "Got it. I'm monitoring the situation.",
-                "I can help with that. Just let me know if you need to schedule a workflow."
-            ];
-            responseText = responses[Math.floor(Math.random() * responses.length)];
+            // Use Gemini for general chat
+            responseText = await getGeminiChatResponse(content);
         }
 
         const agentMsg: ChatMessage = {
             id: Math.random().toString(36).substr(2, 9),
             role: 'agent',
             content: responseText,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            attachments
         };
 
         setState(prev => ({

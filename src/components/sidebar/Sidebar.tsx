@@ -23,7 +23,7 @@ const Sidebar = () => {
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Monitor', path: '/dashboard' },
-        { icon: Smartphone, label: 'Sample Feed', path: '/feed' },
+        { icon: Smartphone, label: 'Feed', path: '/feed' },
         { icon: Library, label: 'Contents', path: '/contents' },
         { icon: Calendar, label: 'Planner', path: '/planner' },
         { icon: BarChart3, label: 'Reports', path: '/reports' },

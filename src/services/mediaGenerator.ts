@@ -196,7 +196,49 @@ export async function generateCaption(
     }
 }
 
+/**
+ * Get chat response from Gemini
+ */
+export async function getGeminiChatResponse(message: string): Promise<string> {
+    if (!GEMINI_API_KEY) {
+        return "I'm listening, but my brain (Gemini API Key) is missing!";
+    }
+
+    try {
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        roles: "user",
+                        parts: [{
+                            text: `You are a helpful, autonomous Social Media AI Agent. Your goal is to help the user plan content, manage their social media, and execute tasks. You can be creative and professional. 
+                            
+                            User: ${message}
+                            
+                            Respond to the user naturally. Keep it concise (under 3 sentences unless asked for more).`
+                        }]
+                    }]
+                })
+            }
+        );
+
+        const data = await response.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        return reply || "I heard you, but I'm not sure what to say.";
+    } catch (error) {
+        console.error('Error chatting with Gemini:', error);
+        return "I'm having trouble connecting to my AI core right now.";
+    }
+}
+
 export default {
     generateMedia,
-    generateCaption
+    generateCaption,
+    getGeminiChatResponse
 };
