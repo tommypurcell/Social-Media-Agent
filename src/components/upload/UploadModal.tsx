@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { toast } from 'sonner';
 import { X, UploadCloud, Film, Type, Wand2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -130,7 +131,12 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
                     <button
                         disabled={step === 1}
                         className="px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        onClick={onClose} // mocking the submission
+                        onClick={() => {
+                            toast.success('Marathon Agent started!', {
+                                description: 'Analyzing footage and generating variants...',
+                            });
+                            onClose();
+                        }}
                     >
                         <Wand2 className="w-4 h-4" />
                         Start Marathon Agent

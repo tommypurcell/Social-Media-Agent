@@ -1,6 +1,7 @@
 import React from 'react';
 import Sidebar from '../sidebar/Sidebar';
 import FeedbackLoop from '../feedback/FeedbackLoop';
+import { Toaster } from 'sonner';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -9,6 +10,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
         <div className="flex h-screen w-full bg-background overflow-hidden text-primary font-sans">
+            <Toaster position="top-right" richColors />
             {/* Sidebar - Left, Narrow */}
             <aside className="w-20 lg:w-64 flex-shrink-0 border-r border-border bg-surface shadow-sm z-10 transition-all duration-300">
                 <Sidebar />

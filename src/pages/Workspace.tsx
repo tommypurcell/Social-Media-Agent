@@ -44,27 +44,47 @@ const Workspace = () => {
             {/* Video Player Area */}
             <div className="flex-grow flex items-center justify-center bg-gray-900 overflow-hidden relative group">
                 {/* Mock Video Player */}
+                {/* Mock Video Player */}
                 <div className={cn(
-                    "bg-black relative shadow-2xl transition-all duration-500",
+                    "bg-black relative shadow-2xl transition-all duration-700 ease-in-out",
                     versions[selectedVersion as keyof typeof versions].label.includes('Insta') || versions[selectedVersion as keyof typeof versions].label.includes('TikTok') ? "aspect-[9/16] h-[80%]" : "aspect-video w-[80%]"
                 )}>
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    {/* Placeholder for Video Content */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                        {isPlaying ? (
+                            <div className="animate-pulse w-full h-full bg-gray-700 flex items-center justify-center text-gray-500">
+                                Playing {versions[selectedVersion as keyof typeof versions].label}...
+                            </div>
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-black">
+                                <Video className="w-16 h-16 text-gray-600 mb-4" />
+                                <p className="text-gray-400">Preview: {versions[selectedVersion as keyof typeof versions].label}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <button
                             onClick={() => setIsPlaying(!isPlaying)}
-                            className="w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition-all transform hover:scale-110"
+                            className="w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition-all transform hover:scale-110 pointer-events-auto"
                         >
                             {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current translate-x-1" />}
                         </button>
                     </div>
                     {/* Fake Progress Bar */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 group-hover:h-2 transition-all cursor-pointer">
-                        <div className="h-full bg-accent w-1/3 relative">
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 group-hover:h-2 transition-all cursor-pointer z-10">
+                        <div className={cn(
+                            "h-full bg-accent relative transition-all duration-[10000ms] ease-linear",
+                            isPlaying ? "w-full" : "w-1/3"
+                        )}>
                             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full scale-0 group-hover:scale-100 transition-transform shadow-sm" />
                         </div>
                     </div>
-                    <div className="absolute top-4 left-4 inline-flex items-center gap-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-xs text-white">
+                    <div className="absolute top-4 left-4 inline-flex items-center gap-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-xs text-white z-10 transition-opacity">
                         <Video className="w-3 h-3 text-accent" />
-                        {versions[selectedVersion as keyof typeof versions].time} • {versions[selectedVersion as keyof typeof versions].description}
+                        <span key={selectedVersion} className="animate-in fade-in duration-300">
+                            {versions[selectedVersion as keyof typeof versions].time} • {versions[selectedVersion as keyof typeof versions].description}
+                        </span>
                     </div>
                 </div>
             </div>
