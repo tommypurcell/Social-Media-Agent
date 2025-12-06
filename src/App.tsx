@@ -8,11 +8,18 @@ import Reports from './pages/Reports';
 import WorkflowPlanner from './pages/WorkflowPlanner';
 import SampleFeedPage from './pages/SampleFeedPage';
 import { AgentProvider } from './lib/AgentContext';
+import { OnboardingModal } from './components/onboarding/OnboardingModal';
+import { useOnboarding } from './hooks/useOnboarding';
 
 function App() {
+  const { isOnboardingComplete, completeOnboarding } = useOnboarding();
+
   return (
     <AgentProvider>
       <Router>
+        {!isOnboardingComplete && (
+          <OnboardingModal onComplete={completeOnboarding} />
+        )}
         <MainLayout>
           <Routes>
             <Route path="/" element={<AgentMonitor />} />

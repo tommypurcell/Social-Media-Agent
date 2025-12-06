@@ -1,23 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Wand2, Calendar, Loader2, Sparkles } from 'lucide-react';
-import type { WorkflowConfig } from '../lib/types';
-
-interface PlannedPost {
-    id: number;
-    platform: string;
-    topic: string;
-    caption: string;
-    captionStarter: string;
-    hashtags: string[];
-    useHashtags: boolean;
-    customHashtags: string;
-    imagePrompt: string;
-    postType: 'photo' | 'reel';
-    scheduledTime: string;
-    status: 'planning' | 'planned' | 'error';
-    uploadedImage?: string; // URL for uploaded file
-}
+import type { WorkflowConfig, PlannedPost } from '../lib/types';
 
 const WorkflowPlanner = () => {
     const navigate = useNavigate();
@@ -28,18 +12,46 @@ const WorkflowPlanner = () => {
     const [currentlyPlanning, setCurrentlyPlanning] = useState<number | null>(null);
     const [uploadedImageURLs, setUploadedImageURLs] = useState<string[]>([]);
 
-    useEffect(() => {
-        if (!config) {
-            navigate('/');
+    const generatePostContent = async (post: PlannedPost): Promise<Partial<PlannedPost>> => {
+        const platformStyles = {
+            instagram: { captionStyle: 'Visual storytelling with emojis', hashtagCount: 10 },
+            tiktok: { captionStyle: 'Short, punchy, trending', hashtagCount: 5 },
+            threads: { captionStyle: 'Conversational and authentic', hashtagCount: 3 },
+        };
+
+        const style = platformStyles[post.platform as keyof typeof platformStyles] || platformStyles.instagram;
+        const hour = 9 + (post.id - 1) * 2;
+        const time = `${hour.toString().padStart(2, '0')}:00`;
+
+        return {
+            caption: `${post.topic} - Engaging ${style.captionStyle} content that resonates with our audience. Ready to make an impact! 🚀`,
+            hashtags: Array.from({ length: style.hashtagCount }, (_, i) =>
+                `#${post.topic.replace(/\s+/g, '')}${i > 0 ? i + 1 : ''}`
+            ),
+            imagePrompt: `High-quality ${post.platform} post featuring ${post.topic}, professional lighting, vibrant colors, engaging composition`,
+            scheduledTime: time,
+        };
+    };
+
+    const planNextPost = async (posts: PlannedPost[], index: number) => {
+        if (index >= posts.length) {
+            setCurrentlyPlanning(null);
             return;
         }
-        initializePosts();
 
-        // Cleanup object URLs on unmount
-        return () => {
-            uploadedImageURLs.forEach(url => URL.revokeObjectURL(url));
-        };
-    }, [config]);
+        const post = posts[index];
+        setCurrentlyPlanning(post.id);
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const planned = await generatePostContent(post);
+
+        setPlannedPosts(prev =>
+            prev.map(p => p.id === post.id ? { ...p, ...planned, status: 'planned' } : p)
+        );
+
+        setTimeout(() => planNextPost(posts, index + 1), 500);
+    };
 
     const initializePosts = () => {
         const posts: PlannedPost[] = [];
@@ -96,48 +108,21 @@ const WorkflowPlanner = () => {
         planNextPost(posts, 0);
     };
 
-    const planNextPost = async (posts: PlannedPost[], index: number) => {
-        if (index >= posts.length) {
-            setCurrentlyPlanning(null);
+    useEffect(() => {
+        if (!config) {
+            navigate('/');
             return;
         }
+        initializePosts();
 
-        const post = posts[index];
-        setCurrentlyPlanning(post.id);
-
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const planned = await generatePostContent(post);
-
-        setPlannedPosts(prev =>
-            prev.map(p => p.id === post.id ? { ...p, ...planned, status: 'planned' } : p)
-        );
-
-        setTimeout(() => planNextPost(posts, index + 1), 500);
-    };
-
-    const generatePostContent = async (post: PlannedPost): Promise<Partial<PlannedPost>> => {
-        const platformStyles = {
-            instagram: { captionStyle: 'Visual storytelling with emojis', hashtagCount: 10 },
-            tiktok: { captionStyle: 'Short, punchy, trending', hashtagCount: 5 },
-            threads: { captionStyle: 'Conversational and authentic', hashtagCount: 3 },
+        // Cleanup object URLs on unmount
+        return () => {
+            uploadedImageURLs.forEach(url => URL.revokeObjectURL(url));
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [config]);
 
-        const style = platformStyles[post.platform as keyof typeof platformStyles] || platformStyles.instagram;
-        const hour = 9 + (post.id - 1) * 2;
-        const time = `${hour.toString().padStart(2, '0')}:00`;
-
-        return {
-            caption: `${post.topic} - Engaging ${style.captionStyle} content that resonates with our audience. Ready to make an impact! 🚀`,
-            hashtags: Array.from({ length: style.hashtagCount }, (_, i) =>
-                `#${post.topic.replace(/\s+/g, '')}${i > 0 ? i + 1 : ''}`
-            ),
-            imagePrompt: `High-quality ${post.platform} post featuring ${post.topic}, professional lighting, vibrant colors, engaging composition`,
-            scheduledTime: time,
-        };
-    };
-
-    const handleEditPost = (id: number, field: keyof PlannedPost, value: any) => {
+    const handleEditPost = (id: number, field: keyof PlannedPost, value: string | boolean | string[]) => {
         setPlannedPosts(prev =>
             prev.map(p => p.id === id ? { ...p, [field]: value } : p)
         );
@@ -200,24 +185,22 @@ const WorkflowPlanner = () => {
                     {plannedPosts.map((post) => (
                         <div
                             key={post.id}
-                            className={`bg-surface rounded-xl border transition-all ${
-                                post.status === 'planning' && currentlyPlanning === post.id
-                                    ? 'border-orange-400 shadow-sm shadow-orange-100'
-                                    : post.status === 'planned'
+                            className={`bg-surface rounded-xl border transition-all ${post.status === 'planning' && currentlyPlanning === post.id
+                                ? 'border-orange-400 shadow-sm shadow-orange-100'
+                                : post.status === 'planned'
                                     ? 'border-border hover:border-gray-300'
                                     : 'border-border'
-                            }`}
+                                }`}
                         >
                             {/* Post Header */}
                             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                        post.status === 'planning' && currentlyPlanning === post.id
-                                            ? 'bg-orange-100'
-                                            : post.status === 'planned'
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${post.status === 'planning' && currentlyPlanning === post.id
+                                        ? 'bg-orange-100'
+                                        : post.status === 'planned'
                                             ? 'bg-green-100'
                                             : 'bg-gray-100'
-                                    }`}>
+                                        }`}>
                                         {post.status === 'planning' && currentlyPlanning === post.id ? (
                                             <Loader2 className="w-4 h-4 text-orange-600 animate-spin" />
                                         ) : post.status === 'planned' ? (
@@ -265,21 +248,19 @@ const WorkflowPlanner = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'photo')}
-                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                                                            post.postType === 'photo'
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700'
-                                                                : 'border-border bg-background text-secondary hover:border-gray-300'
-                                                        }`}
+                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'photo'
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                                            : 'border-border bg-background text-secondary hover:border-gray-300'
+                                                            }`}
                                                     >
                                                         Photo Post
                                                     </button>
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'reel')}
-                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                                                            post.postType === 'reel'
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700'
-                                                                : 'border-border bg-background text-secondary hover:border-gray-300'
-                                                        }`}
+                                                        className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'reel'
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                                            : 'border-border bg-background text-secondary hover:border-gray-300'
+                                                            }`}
                                                     >
                                                         Reel
                                                     </button>
@@ -316,11 +297,10 @@ const WorkflowPlanner = () => {
                                                 <label className="text-xs font-medium text-secondary">Hashtags</label>
                                                 <button
                                                     onClick={() => handleEditPost(post.id, 'useHashtags', !post.useHashtags)}
-                                                    className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${
-                                                        post.useHashtags
-                                                            ? 'bg-orange-100 text-orange-700'
-                                                            : 'bg-gray-100 text-gray-500'
-                                                    }`}
+                                                    className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${post.useHashtags
+                                                        ? 'bg-orange-100 text-orange-700'
+                                                        : 'bg-gray-100 text-gray-500'
+                                                        }`}
                                                 >
                                                     {post.useHashtags ? 'Enabled' : 'Disabled'}
                                                 </button>

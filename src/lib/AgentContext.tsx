@@ -5,7 +5,7 @@ import type { AgentState, WorkflowConfig, Task } from './types';
 interface AgentContextType {
     state: AgentState;
     toggleAgent: () => void;
-    addTask: (description: string, type: Task['type'], metadata?: any) => void;
+    addTask: (description: string, type: Task['type'], metadata?: Record<string, unknown>) => void;
     generateSummary: () => void;
     startWorkflow: (config: WorkflowConfig) => void;
 }
@@ -21,6 +21,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAgentContext() {
     const context = useContext(AgentContext);
     if (!context) throw new Error('useAgentContext must be used within AgentProvider');

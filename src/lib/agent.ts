@@ -26,7 +26,7 @@ export function useAgent() {
         }));
     }, []);
 
-    const addTask = useCallback((description: string, type: Task['type'], metadata?: any) => {
+    const addTask = useCallback((description: string, type: Task['type'], metadata?: Record<string, unknown>) => {
         const newTask: Task = {
             id: Math.random().toString(36).substr(2, 9),
             type,
@@ -41,10 +41,82 @@ export function useAgent() {
         addLog(`Scheduled task: ${description}`);
     }, [addLog]);
 
-    const toggleAgent = () => {
-        setState(prev => ({ ...prev, isActive: !prev.isActive }));
-        addLog(state.isActive ? "Agent stopped." : "Agent started.", 'warning');
-    };
+    const toggleAgent = useCallback(() => {
+        setState(prev => {
+            const isActive = !prev.isActive;
+            // logging needs to happen after state update ideally or with the new state, but here we just toggle
+            return { ...prev, isActive };
+        });
+        // We can't log 'isActive' correctly here because we don't have the new state yet in this scope
+        // strictly speaking. But let's leave logged message generic or fix it.
+        addLog("Agent toggled.", 'warning');
+    }, [addLog]);
+
+    const executeTask = useCallback(async (task: Task) => {
+        addLog(`Executing: ${task.description}...`);
+
+        // Simulate thinking/working
+        await new Promise(r => setTimeout(r, 1000));
+
+        switch (task.type) {
+            case 'check_dms': {
+                const newMsgs = await api.fetchMessages();
+                if (newMsgs.length > 0) {
+                    addLog(`Received ${newMsgs.length} new DM(s).`, 'success');
+                    setState(prev => ({ ...prev, messages: [...prev.messages, ...newMsgs] }));
+                    // Auto-reply logic
+                    newMsgs.forEach((msg) => {
+                        addTask(`Reply to ${msg.sender}: "Thanks for reaching out!"`, 'reply_dm');
+                    });
+                } else {
+                    addLog("Checked DMs: No new messages.");
+                }
+                break;
+            }
+
+            case 'plan_content':
+                addTask("Generate Image: 'Sunset in futuristic city'", "generate_media");
+                break;
+
+            case 'generate_media': {
+                const prompt = task.description.split("'")[1] || "A cool image";
+                let imageUrl = "https://placehold.co/600x400";
+                try {
+                    imageUrl = await api.generateImage(prompt);
+                    addLog(`Generated Media for: ${prompt}`, 'success');
+                } catch {
+                    addLog(`Failed to generate media for: ${prompt}`, 'error');
+                }
+
+                addTask(`Post to Instagram: ${prompt}`, 'post_content', { imageUrl });
+                break;
+            }
+
+            case 'post_content': {
+                const content = task.description.split(": ")[1];
+                const metadata = task.metadata as { imageUrl?: string } | undefined;
+                const postImage = metadata?.imageUrl || "https://placehold.co/600x400";
+                const post = await api.postToInstagram(content, postImage);
+                addLog(`Posted to Instagram: ${post.id}`, 'success');
+                setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
+                break;
+            }
+
+            case 'reply_dm': {
+                const replyContent = "I'm just an AI agent running a simulation! 🤖";
+                await api.sendMessage("user", replyContent);
+                addLog("Sent reply DM.", 'success');
+                break;
+            }
+        }
+
+        // Complete task
+        setState(prev => ({
+            ...prev,
+            currentTask: null,
+            tasks: prev.tasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t)
+        }));
+    }, [addLog, addTask]);
 
     // Main Agent Loop
     useEffect(() => {
@@ -66,7 +138,7 @@ export function useAgent() {
 
                 try {
                     await executeTask(nextTask);
-                } catch (error) {
+                } catch {
                     addLog(`Task failed: ${nextTask.description}`, 'error');
                     setState(prev => ({
                         ...prev,
@@ -88,68 +160,7 @@ export function useAgent() {
 
         const timer = setInterval(loop, 1000); // Check every second
         return () => clearInterval(timer);
-    }, [state.isActive, state.currentTask, state.tasks]); // Dependencies
-
-    const executeTask = async (task: Task) => {
-        addLog(`Executing: ${task.description}...`);
-
-        // Simulate thinking/working
-        await new Promise(r => setTimeout(r, 1000));
-
-        switch (task.type) {
-            case 'check_dms':
-                const newMsgs = await api.fetchMessages();
-                if (newMsgs.length > 0) {
-                    addLog(`Received ${newMsgs.length} new DM(s).`, 'success');
-                    setState(prev => ({ ...prev, messages: [...prev.messages, ...newMsgs] }));
-                    // Auto-reply logic
-                    newMsgs.forEach((msg) => {
-                        addTask(`Reply to ${msg.sender}: "Thanks for reaching out!"`, 'reply_dm');
-                    });
-                } else {
-                    addLog("Checked DMs: No new messages.");
-                }
-                break;
-
-            case 'plan_content':
-                addTask("Generate Image: 'Sunset in futuristic city'", "generate_media");
-                break;
-
-            case 'generate_media':
-                const prompt = task.description.split("'")[1] || "A cool image";
-                let imageUrl = "https://placehold.co/600x400";
-                try {
-                    imageUrl = await api.generateImage(prompt);
-                    addLog(`Generated Media for: ${prompt}`, 'success');
-                } catch (e) {
-                    addLog(`Failed to generate media for: ${prompt}`, 'error');
-                }
-
-                addTask(`Post to Instagram: ${prompt}`, 'post_content', { imageUrl });
-                break;
-
-            case 'post_content':
-                const content = task.description.split(": ")[1];
-                const postImage = task.metadata?.imageUrl || "https://placehold.co/600x400";
-                const post = await api.postToInstagram(content, postImage);
-                addLog(`Posted to Instagram: ${post.id}`, 'success');
-                setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));
-                break;
-
-            case 'reply_dm':
-                const replyContent = "I'm just an AI agent running a simulation! 🤖";
-                await api.sendMessage("user", replyContent);
-                addLog("Sent reply DM.", 'success');
-                break;
-        }
-
-        // Complete task
-        setState(prev => ({
-            ...prev,
-            currentTask: null,
-            tasks: prev.tasks.map(t => t.id === task.id ? { ...t, status: 'completed' } : t)
-        }));
-    };
+    }, [state.isActive, state.currentTask, state.tasks, executeTask, addLog, addTask]);
 
     const generateSummary = useCallback(() => {
         const totalPosts = state.posts.length;

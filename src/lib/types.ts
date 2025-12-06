@@ -27,7 +27,23 @@ export interface Task {
     type: 'plan_content' | 'generate_media' | 'post_content' | 'check_dms' | 'reply_dm' | 'idle';
     status: 'pending' | 'in_progress' | 'completed' | 'failed';
     description: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
+}
+
+export interface PlannedPost {
+    id: number;
+    platform: string;
+    topic: string;
+    caption: string;
+    captionStarter: string;
+    hashtags: string[];
+    useHashtags: boolean;
+    customHashtags: string;
+    imagePrompt: string;
+    postType: 'photo' | 'reel';
+    scheduledTime: string;
+    status: 'planning' | 'planned' | 'error';
+    uploadedImage?: string; // URL for uploaded file
 }
 
 export interface Log {

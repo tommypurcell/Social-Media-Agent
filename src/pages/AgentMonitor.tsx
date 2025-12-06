@@ -1,21 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAgentContext } from '../lib/AgentContext';
-import { Activity, Clock, FileVideo, CheckCircle2, AlertCircle, Play } from 'lucide-react';
+import { Activity, Clock, FileVideo, CheckCircle2, AlertCircle, Play, Sparkles, Target } from 'lucide-react';
 import { NewWorkflowModal } from '../components/NewWorkflowModal';
-import type { WorkflowConfig } from '../lib/types';
+import type { WorkflowConfig, PlannedPost } from '../lib/types';
+import { useOnboarding } from '../hooks/useOnboarding';
 
 const AgentMonitor = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state, addTask, toggleAgent } = useAgentContext();
+    const { onboardingData } = useOnboarding();
     const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
     const processedRef = useRef(false);
 
     // Handle return from Workflow Planner
     useEffect(() => {
         if (location.state?.plannedPosts && !processedRef.current) {
-            const posts = location.state.plannedPosts as any[];
+            const posts = location.state.plannedPosts as PlannedPost[];
             console.log("Received planned posts:", posts);
 
             posts.forEach(post => {
@@ -56,12 +58,114 @@ const AgentMonitor = () => {
         thumbnail: null
     }));
 
+    // Get greeting based on time of day
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning';
+        if (hour < 18) return 'Good afternoon';
+        return 'Good evening';
+    };
+
+    const firstName = onboardingData?.fullName.split(' ')[0] || 'there';
+
     return (
         <div className="flex-1 overflow-y-auto bg-background p-8">
+            {/* Personalized Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-primary mb-2">Agent Monitor</h1>
-                <p className="text-secondary">Real-time supervision of Marathon Agent activities.</p>
+                <div className="flex items-center gap-3 mb-3">
+                    <h1 className="text-3xl font-bold text-primary">
+                        {getGreeting()}, {firstName}!
+                    </h1>
+                    <Sparkles className="w-6 h-6 text-yellow-500" />
+                </div>
+                <p className="text-secondary">Real-time supervision of your Marathon Agent activities.</p>
+
+                {/* User Profile Summary */}
+                {onboardingData && (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                        {onboardingData.primaryUseCase && (
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full text-sm">
+                                <Target className="w-4 h-4 text-indigo-600" />
+                                <span className="text-indigo-700 font-medium">{onboardingData.primaryUseCase}</span>
+                            </div>
+                        )}
+                        {onboardingData.platforms && onboardingData.platforms.length > 0 && (
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-full text-sm">
+                                <span className="text-purple-700 font-medium">
+                                    {onboardingData.platforms.length} Platform{onboardingData.platforms.length !== 1 ? 's' : ''} Connected
+                                </span>
+                            </div>
+                        )}
+                        {onboardingData.goals && onboardingData.goals.length > 0 && (
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-sm">
+                                <span className="text-green-700 font-medium">
+                                    {onboardingData.goals.length} Active Goal{onboardingData.goals.length !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
+
+            {/* Personalized Quick Actions */}
+            {onboardingData && onboardingData.goals && onboardingData.goals.length > 0 && (
+                <div className="mb-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Sparkles className="w-5 h-5 text-indigo-600" />
+                        <h2 className="text-lg font-semibold text-gray-900">Recommended for You</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {onboardingData.goals.includes('content-creation') && (
+                            <button
+                                onClick={() => navigate('/workflow-planner')}
+                                className="p-4 bg-white rounded-lg border border-indigo-200 hover:border-indigo-400 hover:shadow-md transition-all text-left group"
+                            >
+                                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-indigo-200 transition-colors">
+                                    <FileVideo className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 mb-1">Plan Content</h3>
+                                <p className="text-xs text-gray-600">Create your next post</p>
+                            </button>
+                        )}
+                        {onboardingData.goals.includes('analytics') && (
+                            <button
+                                onClick={() => navigate('/reports')}
+                                className="p-4 bg-white rounded-lg border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all text-left group"
+                            >
+                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-purple-200 transition-colors">
+                                    <Activity className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 mb-1">View Analytics</h3>
+                                <p className="text-xs text-gray-600">Check performance</p>
+                            </button>
+                        )}
+                        {onboardingData.goals.includes('engagement') && (
+                            <button
+                                onClick={() => navigate('/feed')}
+                                className="p-4 bg-white rounded-lg border border-pink-200 hover:border-pink-400 hover:shadow-md transition-all text-left group"
+                            >
+                                <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-pink-200 transition-colors">
+                                    <CheckCircle2 className="w-5 h-5 text-pink-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 mb-1">Engage Audience</h3>
+                                <p className="text-xs text-gray-600">Respond to comments</p>
+                            </button>
+                        )}
+                        {onboardingData.goals.includes('audience-growth') && (
+                            <button
+                                onClick={() => navigate('/planner')}
+                                className="p-4 bg-white rounded-lg border border-green-200 hover:border-green-400 hover:shadow-md transition-all text-left group"
+                            >
+                                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
+                                    <Target className="w-5 h-5 text-green-600" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 mb-1">Growth Strategy</h3>
+                                <p className="text-xs text-gray-600">Plan your growth</p>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {/* Status Overview Card */}
