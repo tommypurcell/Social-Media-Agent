@@ -54,42 +54,29 @@ const WorkflowPlanner = () => {
             setUploadedImageURLs(imageURLs);
         }
 
-        if (config.individualPosts && config.individualPosts.length > 0) {
-            config.individualPosts.forEach((post, index) => {
-                posts.push({
-                    id: post.id,
-                    platform: post.platform,
-                    topic: post.topic,
-                    caption: '',
-                    captionStarter: '',
-                    hashtags: [],
-                    useHashtags: true,
-                    customHashtags: '',
-                    imagePrompt: '',
-                    postType: 'photo',
-                    scheduledTime: '',
-                    status: 'planning',
-                    uploadedImage: imageURLs[index % imageURLs.length], // Assign uploaded image
-                });
-            });
-        } else {
-            for (let i = 1; i <= config.postCount; i++) {
-                posts.push({
-                    id: i,
-                    platform: config.platforms[i % config.platforms.length],
-                    topic: `Post ${i}`,
-                    caption: '',
-                    captionStarter: '',
-                    hashtags: [],
-                    useHashtags: true,
-                    customHashtags: '',
-                    imagePrompt: '',
-                    postType: 'photo',
-                    scheduledTime: '',
-                    status: 'planning',
-                    uploadedImage: imageURLs[i - 1] || imageURLs[(i - 1) % imageURLs.length], // Assign uploaded image if available
-                });
+        for (let i = 1; i <= config.postCount; i++) {
+            let topic = `Post ${i}`;
+            if (config.inputMethod === 'idea' && config.userIdea) {
+                topic = `${config.userIdea} (Part ${i})`;
+            } else if (config.inputMethod === 'upload') {
+                topic = `Highlighted Content ${i}`;
             }
+
+            posts.push({
+                id: i,
+                platform: config.platforms[i % config.platforms.length],
+                topic,
+                caption: '',
+                captionStarter: '',
+                hashtags: [],
+                useHashtags: true,
+                customHashtags: '',
+                imagePrompt: '',
+                postType: config.contentType === 'video' ? 'reel' : 'photo',
+                scheduledTime: '',
+                status: 'planning',
+                uploadedImage: imageURLs[i - 1] || imageURLs[(i - 1) % imageURLs.length],
+            });
         }
 
         setPlannedPosts(posts);
@@ -105,7 +92,9 @@ const WorkflowPlanner = () => {
         const post = posts[index];
         setCurrentlyPlanning(post.id);
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Smart Mode Delay Simulation (refining content)
+        const delayTime = config.smartMode ? 3500 : 2000;
+        await new Promise(resolve => setTimeout(resolve, delayTime));
 
         const planned = await generatePostContent(post);
 
@@ -130,12 +119,25 @@ const WorkflowPlanner = () => {
         const hour = 9 + (post.id - 1) * 2;
         const time = `${hour.toString().padStart(2, '0')}:00`;
 
+        // Tone Logic
+        const toneAdjective = config.tone === 'default' ? 'engaging' : config.tone;
+
+        // Content Type Logic for Prompt
+        let promptContext = "";
+        if (config.contentType === 'video') {
+            promptContext = "Create a viral reel concept/script.";
+        } else if (config.contentType === 'text') {
+            promptContext = "Focus purely on compelling copy.";
+        } else {
+            promptContext = "Create a stunning visual post.";
+        }
+
         return {
-            caption: `${post.topic} - Engaging ${style.captionStyle} content that resonates with our audience. Ready to make an impact! 🚀`,
+            caption: `${post.topic} - Writing in a ${toneAdjective} tone. ${style.captionStyle}. ${promptContext} Ready to ship! 🚀`,
             hashtags: Array.from({ length: style.hashtagCount }, (_, i) =>
-                `#${post.topic.replace(/\s+/g, '')}${i > 0 ? i + 1 : ''}`
+                `#${config.tone}${i > 0 ? i + 1 : ''}`
             ),
-            imagePrompt: `High-quality ${post.platform} post featuring ${post.topic}, professional lighting, vibrant colors, engaging composition`,
+            imagePrompt: config.contentType === 'text' ? '' : `High-quality ${post.platform} ${config.contentType} featuring ${post.topic}, ${toneAdjective} atmosphere, professional lighting`,
             scheduledTime: time,
         };
     };
@@ -204,20 +206,20 @@ const WorkflowPlanner = () => {
                         <div
                             key={post.id}
                             className={`bg-surface rounded-xl border transition-all ${post.status === 'planning' && currentlyPlanning === post.id
-                                    ? 'border-orange-400 shadow-sm shadow-orange-100'
-                                    : post.status === 'planned'
-                                        ? 'border-border hover:border-gray-300'
-                                        : 'border-border'
+                                ? 'border-orange-400 shadow-sm shadow-orange-100'
+                                : post.status === 'planned'
+                                    ? 'border-border hover:border-gray-300'
+                                    : 'border-border'
                                 }`}
                         >
                             {/* Post Header */}
                             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${post.status === 'planning' && currentlyPlanning === post.id
-                                            ? 'bg-orange-100'
-                                            : post.status === 'planned'
-                                                ? 'bg-green-100'
-                                                : 'bg-gray-100'
+                                        ? 'bg-orange-100'
+                                        : post.status === 'planned'
+                                            ? 'bg-green-100'
+                                            : 'bg-gray-100'
                                         }`}>
                                         {post.status === 'planning' && currentlyPlanning === post.id ? (
                                             <Loader2 className="w-4 h-4 text-orange-600 animate-spin" />
@@ -267,8 +269,8 @@ const WorkflowPlanner = () => {
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'photo')}
                                                         className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'photo'
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700'
-                                                                : 'border-border bg-background text-secondary hover:border-gray-300'
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                                            : 'border-border bg-background text-secondary hover:border-gray-300'
                                                             }`}
                                                     >
                                                         Photo Post
@@ -276,8 +278,8 @@ const WorkflowPlanner = () => {
                                                     <button
                                                         onClick={() => handleEditPost(post.id, 'postType', 'reel')}
                                                         className={`flex-1 px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all ${post.postType === 'reel'
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700'
-                                                                : 'border-border bg-background text-secondary hover:border-gray-300'
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                                            : 'border-border bg-background text-secondary hover:border-gray-300'
                                                             }`}
                                                     >
                                                         Reel
@@ -316,8 +318,8 @@ const WorkflowPlanner = () => {
                                                 <button
                                                     onClick={() => handleEditPost(post.id, 'useHashtags', !post.useHashtags)}
                                                     className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${post.useHashtags
-                                                            ? 'bg-orange-100 text-orange-700'
-                                                            : 'bg-gray-100 text-gray-500'
+                                                        ? 'bg-orange-100 text-orange-700'
+                                                        : 'bg-gray-100 text-gray-500'
                                                         }`}
                                                 >
                                                     {post.useHashtags ? 'Enabled' : 'Disabled'}

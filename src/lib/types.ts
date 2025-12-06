@@ -54,12 +54,18 @@ export interface PostConfig {
 }
 
 export interface WorkflowConfig {
-    type: 'full_day' | 'content_only' | 'dm_only' | 'plan_posts' | 'custom';
+    type: 'custom'; // Simplified to just custom for now, as we're dynamically building it
     platforms: ('instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook')[];
+    contentType: 'video' | 'image' | 'text';
+    inputMethod: 'upload' | 'idea' | 'auto';
+    tone: 'default' | 'energetic' | 'professional' | 'educational' | 'inspirational' | 'meme';
     postCount: number;
-    enableDMs: boolean;
-    enableSelfCorrection: boolean;
-    contentSource: 'upload' | 'ai_generated';
+    schedule: 'now' | 'scheduled' | 'draft';
+    smartMode: boolean;
+    // Optional fields for specific input methods
+    userIdea?: string;
     uploadedFiles?: File[];
-    individualPosts?: PostConfig[];
+    individualPosts?: PostConfig[]; // Keep for compatibility or advanced mode if needed
+    enableDMs: boolean; // Keep for now to avoid breaking other parts, but maybe hide in UI
+    enableSelfCorrection: boolean; // Mapped to smartMode concept
 }

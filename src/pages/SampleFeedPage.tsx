@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Feed } from '../components/Feed';
 import { useAgent } from '../lib/agent';
-import { Instagram, Music, MessageSquare } from 'lucide-react';
+import { Instagram, Music, MessageSquare, Linkedin, Twitter, Facebook } from 'lucide-react';
 
 const SampleFeedPage = () => {
     const { state } = useAgent();
-    const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'tiktok' | 'threads'>('instagram');
+    const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'tiktok' | 'threads' | 'linkedin' | 'twitter' | 'facebook'>('instagram');
 
     // Filter posts by platform
     const filteredPosts = state.posts.filter(post => post.platform === selectedPlatform);
@@ -14,6 +14,9 @@ const SampleFeedPage = () => {
         { id: 'instagram' as const, name: 'Instagram', icon: Instagram, color: 'pink' },
         { id: 'tiktok' as const, name: 'TikTok', icon: Music, color: 'cyan' },
         { id: 'threads' as const, name: 'Threads', icon: MessageSquare, color: 'purple' },
+        { id: 'linkedin' as const, name: 'LinkedIn', icon: Linkedin, color: 'blue' },
+        { id: 'twitter' as const, name: 'Twitter', icon: Twitter, color: 'sky' },
+        { id: 'facebook' as const, name: 'Facebook', icon: Facebook, color: 'blue' },
     ];
 
     return (
@@ -33,11 +36,10 @@ const SampleFeedPage = () => {
                                 <button
                                     key={platform.id}
                                     onClick={() => setSelectedPlatform(platform.id)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all ${
-                                        isSelected
-                                            ? 'bg-orange-100 text-orange-700 shadow-sm'
-                                            : 'text-secondary hover:bg-gray-50'
-                                    }`}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-all ${isSelected
+                                        ? 'bg-orange-100 text-orange-700 shadow-sm'
+                                        : 'text-secondary hover:bg-gray-50'
+                                        }`}
                                 >
                                     <Icon className="w-4 h-4" />
                                     {platform.name}

@@ -1,5 +1,5 @@
 import type { Post } from '../lib/types';
-import { Instagram, Heart, MessageCircle, Send, Music } from 'lucide-react';
+import { Instagram, Heart, MessageCircle, Send, Music, Linkedin, Twitter, Facebook } from 'lucide-react';
 
 interface FeedProps {
     posts: Post[];
@@ -25,6 +25,21 @@ export function Feed({ posts }: FeedProps) {
             icon: MessageCircle,
             color: 'text-purple-600',
             name: 'Threads'
+        },
+        linkedin: {
+            icon: Linkedin,
+            color: 'text-blue-700',
+            name: 'LinkedIn'
+        },
+        twitter: {
+            icon: Twitter,
+            color: 'text-blue-400',
+            name: 'Twitter'
+        },
+        facebook: {
+            icon: Facebook,
+            color: 'text-blue-600',
+            name: 'Facebook'
         }
     };
 

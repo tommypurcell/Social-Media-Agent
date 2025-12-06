@@ -116,7 +116,21 @@ export function useAgent() {
                 break;
 
             case 'generate_media':
-                const prompt = task.description.split("'")[1] || "A cool image";
+                // Extract prompt: try to find content inside ' ' or just use the whole description minus "Generate Image: "
+                let prompt = "A cool image";
+                let targetPlatform = 'instagram'; // Default
+
+                // Parse description "Generate Image: 'Prompt' for Platform"
+                const promptMatch = task.description.match(/Generate Image: '(.*?)'/);
+                if (promptMatch) {
+                    prompt = promptMatch[1];
+                }
+
+                const platformMatch = task.description.match(/for (\w+)$/i);
+                if (platformMatch) {
+                    targetPlatform = platformMatch[1].toLowerCase();
+                }
+
                 let imageUrl = "https://placehold.co/600x400";
                 try {
                     imageUrl = await api.generateImage(prompt);
@@ -125,12 +139,16 @@ export function useAgent() {
                     addLog(`Failed to generate media for: ${prompt}`, 'error');
                 }
 
-                addTask(`Post to Instagram: ${prompt}`, 'post_content', { imageUrl });
+                addLog(`Scheduling post to ${targetPlatform} with generated image.`);
+                addTask(`Post to ${targetPlatform}: ${prompt}`, 'post_content', { imageUrl });
                 break;
 
             case 'post_content':
-                const content = task.description.split(": ")[1];
-                const postImage = task.metadata?.imageUrl || "https://placehold.co/600x400";
+                const content = task.description.includes(": ")
+                    ? task.description.split(": ")[1]
+                    : task.description;
+
+                const postImage = task.metadata?.imageUrl;
 
                 let post: Post;
                 const descLower = task.description.toLowerCase();
@@ -142,10 +160,10 @@ export function useAgent() {
                 } else if (descLower.includes('facebook')) {
                     post = await api.postToFacebook(content, postImage);
                 } else if (descLower.includes('threads')) {
-                    post = await api.postToThreads(content);
+                    post = await api.postToThreads(content, postImage);
                 } else {
                     // Default to Instagram
-                    post = await api.postToInstagram(content, postImage);
+                    post = await api.postToInstagram(content, postImage || "https://placehold.co/600x400");
                 }
 
                 addLog(`Posted to ${post.platform}: ${post.id}`, 'success');
@@ -208,9 +226,7 @@ export function useAgent() {
             }
         }
 
-        if (config.type === 'full_day') {
-            // Maybe add long running background monitoring?
-        }
+
     }, [addLog, addTask]);
 
     return { state, toggleAgent, addTask, generateSummary, startWorkflow };

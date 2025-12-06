@@ -53,7 +53,7 @@ const AgentMonitor = () => {
         progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
         platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
             task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
-        thumbnail: null
+        thumbnail: task.metadata?.imageUrl || null
     }));
 
     return (

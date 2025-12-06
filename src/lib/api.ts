@@ -57,11 +57,12 @@ export const api = {
         };
     },
 
-    async postToThreads(content: string): Promise<Post> {
+    async postToThreads(content: string, imageUrl?: string): Promise<Post> {
         await delay(1500);
         return {
             id: Math.random().toString(36).substr(2, 9),
             content,
+            image: imageUrl,
             platform: 'threads',
             likes: 0,
             comments: [],
