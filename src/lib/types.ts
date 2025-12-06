@@ -44,3 +44,41 @@ export interface AgentState {
     messages: Message[];
     logs: Log[];
 }
+
+export interface SocialPlatform {
+    id: string;
+    name: string;
+    icon: string;
+    connected: boolean;
+    username?: string;
+}
+
+export interface BusinessProfile {
+    companyName: string;
+    industry: string;
+    brandVoice: string;
+    targetAudience: string;
+    description: string;
+}
+
+export interface ContentPreferences {
+    contentTypes: string[];
+    topics: string[];
+    tone: string;
+    postingFrequency: string;
+}
+
+export interface PostingSchedule {
+    timezone: string;
+    preferredTimes: string[];
+    activeDays: string[];
+}
+
+export interface OnboardingData {
+    step: number;
+    completed: boolean;
+    platforms: SocialPlatform[];
+    businessProfile: BusinessProfile;
+    contentPreferences: ContentPreferences;
+    postingSchedule: PostingSchedule;
+}
