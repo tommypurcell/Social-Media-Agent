@@ -224,7 +224,8 @@ export function useAgent() {
                     simulatedComments: simulatedPost.comments.map(c => ({
                         ...c,
                         timestamp: c.timestamp.toISOString()
-                    }))
+                    })),
+                    status: 'uploaded' as const,
                 };
 
                 setState(prev => ({ ...prev, posts: [post, ...prev.posts] }));

@@ -22,6 +22,8 @@ export interface Post {
         likes: number;
     }[];
     timestamp: number;
+    status?: 'preview' | 'scheduled' | 'uploaded';
+    scheduledTime?: number;
 }
 
 export interface Comment {
@@ -44,7 +46,7 @@ export interface Task {
     status: 'pending' | 'in_progress' | 'completed' | 'failed';
     description: string;
     metadata?: Record<string, unknown>;
-    createdAt: number;
+    createdAt?: number;
     completedAt?: number;
 }
 

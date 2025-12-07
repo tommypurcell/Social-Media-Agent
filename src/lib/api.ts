@@ -54,6 +54,7 @@ export const api = {
             likes: 0,
             comments: [],
             timestamp: Date.now(),
+            status: 'uploaded',
         };
     },
 
@@ -66,7 +67,21 @@ export const api = {
             likes: 0,
             comments: [],
             timestamp: Date.now(),
+            status: 'uploaded',
         };
+    },
+
+    generateText: async (prompt: string): Promise<Post> => {
+        // Mock response for now
+        return {
+            id: Date.now().toString(),
+            content: `Generated text for: ${prompt}`,
+            platform: 'threads',
+            likes: 0,
+            comments: [],
+            timestamp: Date.now(),
+            status: 'uploaded',
+        } as Post;
     },
 
     async fetchMessages(): Promise<Message[]> {

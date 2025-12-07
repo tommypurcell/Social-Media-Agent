@@ -11,7 +11,8 @@ const Reports = () => {
         totals,
         platformBreakdown,
         topContent,
-        recentFeedback
+        recentFeedback,
+        feedbackSummary
     } = useMemo(() => {
         const getCommentCount = (post: any) => {
             if (Array.isArray(post.comments)) return post.comments.length;
@@ -85,7 +86,13 @@ const Reports = () => {
             .sort((a, b) => b.timestamp - a.timestamp)
             .slice(0, 10);
 
-        return { totals, platformBreakdown, topContent, recentFeedback };
+        const feedbackSummary = {
+            replies: totals.comments,
+            dms: inboundDMs.length,
+            hotChannel: platformBreakdown.sort((a, b) => b.comments + b.dms - (a.comments + a.dms))[0] || null
+        };
+
+        return { totals, platformBreakdown, topContent, recentFeedback, feedbackSummary };
     }, [state.posts, state.messages, inboundDMs]);
 
     return (
@@ -207,6 +214,43 @@ const Reports = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+
+            {/* Feedback Summary Section */}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <p className="text-sm font-semibold text-primary">Feedback summary</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3">Replies + DMs across all platforms.</p>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+                            <p className="text-xs text-blue-700 uppercase tracking-wide">Replies</p>
+                            <p className="text-xl font-bold text-blue-900">{feedbackSummary.replies}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-amber-50 border border-amber-100">
+                            <p className="text-xs text-amber-700 uppercase tracking-wide">DMs</p>
+                            <p className="text-xl font-bold text-amber-900">{feedbackSummary.dms}</p>
+                        </div>
+                    </div>
+                    {feedbackSummary.hotChannel && (
+                        <div className="mt-4 text-sm text-gray-700">
+                            Hot channel: <span className="font-semibold capitalize">{feedbackSummary.hotChannel.platform}</span> ({feedbackSummary.hotChannel.comments + feedbackSummary.hotChannel.dms} touchpoints)
+                        </div>
+                    )}
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 lg:col-span-2">
+                    <div className="flex items-center gap-2 mb-3">
+                        <MessageSquare className="w-4 h-4 text-indigo-600" />
+                        <p className="text-sm font-semibold text-primary">Themes & takeaways</p>
+                    </div>
+                    <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                        <li>Engagement skewed to {feedbackSummary.hotChannel?.platform || 'your top channel'}; consider cross-posting high performers.</li>
+                        <li>DM volume indicates appetite for collabs/resources—prep quick reply templates.</li>
+                        <li>Replies show interest in “how-to” and BTS angles; schedule more of these variants.</li>
+                    </ul>
                 </div>
             </div>
 

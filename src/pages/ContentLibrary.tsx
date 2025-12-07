@@ -211,6 +211,12 @@ const ContentLibrary = () => {
     const selectedPost = selectedContentId ? getPostForTask(selectedContentId) : null;
     const selectedFeedback = useMemo(() => selectedContentId ? getFeedbackForContent(selectedContentId) : [], [selectedContentId, state.messages, state.posts]);
 
+    // Only show content-related tasks in this view
+    const contentTasks = useMemo(
+        () => state.tasks.filter(t => ['post_content', 'plan_content', 'generate_media'].includes(t.type)),
+        [state.tasks]
+    );
+
     // Generate branches for a content (variations for different platforms/styles)
     const generateBranchesForContent = (task: any, metadata: any): ContentBranch[] => {
         const baseContent = {
@@ -408,7 +414,7 @@ const ContentLibrary = () => {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">{state.tasks.length}</div>
+                        <div className="text-2xl font-bold text-primary">{contentTasks.length}</div>
                         <div className="text-xs text-secondary uppercase tracking-wide">Total Tasks</div>
                     </div>
                     <div className="h-10 w-px bg-border" />
@@ -420,7 +426,7 @@ const ContentLibrary = () => {
             </div>
 
             {/* Content Grid */}
-            {state.tasks.length === 0 ? (
+            {contentTasks.length === 0 ? (
                 <div className="bg-surface rounded-xl shadow-sm border border-border p-12 text-center">
                     <Film className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No content yet</h3>
@@ -581,7 +587,7 @@ const ContentLibrary = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {state.tasks.map((task) => {
+                    {contentTasks.map((task) => {
                         const statusDisplay = getStatusDisplay(task.status);
                         const StatusIcon = statusDisplay.icon;
                         const post = getPostForTask(task.id);

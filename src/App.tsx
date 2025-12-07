@@ -8,10 +8,12 @@ import Planner from './pages/Planner';
 import Reports from './pages/Reports';
 import WorkflowPlanner from './pages/WorkflowPlanner';
 import SampleFeedPage from './pages/SampleFeedPage';
+import Feedback from './pages/Feedback';
 import Settings from './pages/Settings';
 import AuthCallback from './pages/AuthCallback';
 import Landing from './pages/Landing';
 import ContentBranches from './pages/ContentBranches';
+import AIStudioWorkflow from './pages/AIStudioWorkflow';
 import { AgentProvider } from './lib/AgentContext';
 import { OnboardingProvider } from './lib/OnboardingContext';
 import { useOnboarding } from './hooks/useOnboarding';
@@ -78,10 +80,26 @@ function AppRoutes() {
         )
       } />
 
+      <Route path="/ai-studio" element={
+        !isOnboardingComplete ? <Navigate to="/" replace /> : (
+          <MainLayout>
+            <AIStudioWorkflow />
+          </MainLayout>
+        )
+      } />
+
       <Route path="/reports" element={
         !isOnboardingComplete ? <Navigate to="/" replace /> : (
           <MainLayout>
             <Reports />
+          </MainLayout>
+        )
+      } />
+
+      <Route path="/feedback" element={
+        !isOnboardingComplete ? <Navigate to="/" replace /> : (
+          <MainLayout>
+            <Feedback />
           </MainLayout>
         )
       } />

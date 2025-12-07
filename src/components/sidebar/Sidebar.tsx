@@ -1,11 +1,15 @@
-import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone, CheckCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Library, Calendar, BarChart3, Settings, UserCircle, Smartphone, CheckCircle, LogOut, MessageSquare, Zap, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { tokenStorage } from '../../services/tokenStorage';
 import { useOnboarding } from '../../hooks/useOnboarding';
 
-const Sidebar = () => {
+interface SidebarProps {
+    onFastContentCreate?: () => void;
+}
+
+const Sidebar = ({ onFastContentCreate }: SidebarProps) => {
     const [connectedCount, setConnectedCount] = useState(0);
     const { onboardingData, resetOnboarding } = useOnboarding();
 
@@ -25,18 +29,28 @@ const Sidebar = () => {
         { icon: LayoutDashboard, label: 'Monitor', path: '/dashboard' },
         { icon: Smartphone, label: 'Feed', path: '/feed' },
         { icon: Library, label: 'Contents', path: '/contents' },
+        { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
         { icon: Calendar, label: 'Planner', path: '/planner' },
+        { icon: Sparkles, label: 'AI Studio', path: '/ai-studio' },
         { icon: BarChart3, label: 'Reports', path: '/reports' },
     ];
 
     return (
         <div className="flex flex-col h-full bg-surface p-4">
-            <div className="mb-8 flex items-center justify-center lg:justify-start lg:px-2">
+            <div className="mb-6 flex items-center justify-center lg:justify-start lg:px-2">
                 <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl shadow-md">
                     C
                 </div>
                 <span className="ml-3 font-semibold text-lg hidden lg:block text-primary">Connectivity</span>
             </div>
+
+            <button
+                onClick={onFastContentCreate}
+                className="mb-6 w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-violet-700 transition-all duration-200 group"
+            >
+                <Zap className="w-5 h-5 text-yellow-300 fill-yellow-300" />
+                <span className="hidden lg:block font-medium">Fast Create</span>
+            </button>
 
             <nav className="space-y-2 flex-1">
                 {navItems.map((item) => (

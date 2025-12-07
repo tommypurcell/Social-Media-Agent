@@ -21,6 +21,7 @@ export const mockApi = {
             likes: 0,
             comments: [],
             timestamp: Date.now(),
+            status: 'uploaded',
         };
     },
 
@@ -33,6 +34,7 @@ export const mockApi = {
             likes: 0,
             comments: [],
             timestamp: Date.now(),
+            status: 'uploaded',
         };
     },
 

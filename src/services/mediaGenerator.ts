@@ -50,28 +50,22 @@ async function enhancePromptWithGemini(topic: string, platform: string): Promise
     }
 }
 
-// Get images from Pexels
+// Get images from Pollinations.ai (Free AI Image Generator)
 async function getPexelsImage(query: string): Promise<string> {
     try {
-        const response = await fetch(
-            `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=square`,
-            {
-                headers: {
-                    'Authorization': PEXELS_API_KEY
-                }
-            }
-        );
+        // Pollinations.ai generates real AI images from prompts
+        // We encode the query to ensure it works in the URL
+        const safeQuery = encodeURIComponent(query);
+        const imageUrl = `https://image.pollinations.ai/prompt/${safeQuery}?width=1080&height=1080&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;
 
-        const data = await response.json();
+        // Verify connectivity (optional, but good practice)
+        // Since it's a direct URL, we can just return it. 
+        // The browser will load it. 
 
-        if (data.photos && data.photos.length > 0) {
-            return data.photos[0].src.large2x || data.photos[0].src.large;
-        }
-
-        // Final fallback
-        return `https://placehold.co/1080x1080/6366f1/ffffff?text=${encodeURIComponent(query.substring(0, 30))}`;
+        console.log(`Generating image via Pollinations for: ${query}`);
+        return imageUrl;
     } catch (error) {
-        console.error('Error fetching from Pexels:', error);
+        console.error('Error generating image:', error);
         return `https://placehold.co/1080x1080/6366f1/ffffff?text=${encodeURIComponent(query.substring(0, 30))}`;
     }
 }
