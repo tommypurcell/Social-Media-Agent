@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { PostDraft, Platform } from '../types';
 import {
-    CheckCircle,
     MessageCircle,
     Heart,
     Send,
@@ -28,7 +27,8 @@ import {
     Youtube,
     Library,
     Home,
-    Bell
+    Bell,
+    CheckCircle
 } from 'lucide-react';
 
 interface Props {
@@ -105,7 +105,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
 
     const isTikTok = activePlatform === 'Tiktok';
     const isYoutube = activePlatform === 'YouTube Shorts';
-    const isImmersiveVideo = isTikTok || isYoutube; // Ensure variable usage if intended, or remove if causing warning. It is used in JSX.
+    const isImmersiveVideo = isTikTok || isYoutube;
 
     const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -306,17 +306,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
         };
     }, [posts]);
 
-    // Brand colors helper
-    const getPlatformColor = (p: Platform) => {
-        switch (p) {
-            case 'Instagram': return 'from-purple-500 to-pink-500';
-            case 'Tiktok': return 'from-black to-gray-800';
-            case 'Threads': return 'from-black to-gray-900';
-            case 'YouTube Shorts': return 'from-red-600 to-red-800';
-            default: return 'from-blue-500 to-blue-600';
-        }
-    };
-
     const getPlatformIcon = (p: Platform) => {
         switch (p) {
             case 'Instagram': return <Instagram className="w-4 h-4" />;
@@ -328,42 +317,42 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 text-gray-100 font-sans flex flex-col items-center">
+        <div className="w-full min-h-full bg-background text-primary font-sans flex flex-col items-center pb-20">
 
             {/* --- TOP BAR: Global Controls --- */}
-            <div className="w-full bg-gray-800 border-b border-gray-700 sticky top-0 z-20 shadow-md">
+            <div className="w-full bg-surface border-b border-border sticky top-0 z-20 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
 
                     {/* Agent Status */}
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border border-gray-700">
+                        <div className="flex items-center gap-3 bg-green-50 px-4 py-2 rounded-xl border border-green-200">
                             <div className="relative">
                                 <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping absolute top-0 right-0"></div>
-                                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                                    <Terminal className="w-4 h-4 text-green-400" />
+                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-green-100">
+                                    <Terminal className="w-4 h-4 text-green-600" />
                                 </div>
                             </div>
                             <div>
-                                <h1 className="text-sm font-bold text-white tracking-wide leading-tight">SOCIAL AGENT</h1>
-                                <p className="text-xs text-green-400 font-mono">● Online</p>
+                                <h1 className="text-sm font-bold text-gray-900 tracking-wide leading-tight">SOCIAL AGENT</h1>
+                                <p className="text-xs text-green-600 font-medium">● Online</p>
                             </div>
                         </div>
-                        <div className="hidden md:block h-8 w-px bg-gray-700"></div>
-                        <div className="hidden md:flex items-center gap-2 text-xs text-gray-400">
-                            <Loader2 className="w-3 h-3 animate-spin" />
+                        <div className="hidden md:block h-8 w-px bg-gray-200"></div>
+                        <div className="hidden md:flex items-center gap-2 text-xs text-gray-500">
+                            <Loader2 className="w-3 h-3 animate-spin text-accent" />
                             {currentTask}
                         </div>
                     </div>
 
                     {/* Platform Switcher */}
-                    <div className="flex bg-gray-900 p-1 rounded-xl border border-gray-700 overflow-x-auto max-w-[90vw] md:max-w-auto">
+                    <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 overflow-x-auto max-w-[90vw] md:max-w-auto">
                         {distinctPlatforms.map(p => (
                             <button
                                 key={p}
                                 onClick={() => setActivePlatform(p)}
                                 className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap ${activePlatform === p
-                                        ? `bg-gradient-to-r ${getPlatformColor(p)} text-white shadow-lg`
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                    ? `bg-white text-accent shadow-sm border border-border`
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
                                     }`}
                             >
                                 {getPlatformIcon(p)}
@@ -374,7 +363,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
 
                     <button
                         onClick={onReset}
-                        className="text-xs text-red-400 hover:text-red-300 border border-red-900/50 hover:bg-red-900/20 px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                        className="text-xs text-red-500 hover:text-red-600 border border-red-200 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors whitespace-nowrap font-medium"
                     >
                         Stop Simulation
                     </button>
@@ -389,16 +378,16 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                     {/* Stats Overview */}
                     <div className="grid grid-cols-3 gap-3">
                         {[
-                            { label: 'Posts Live', val: stats.postsPublished, icon: Send, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-                            { label: 'DMs Handling', val: stats.dmsReplied, icon: MessageCircle, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-                            { label: 'Engagement', val: formatNumber(totalEngagement), icon: Heart, color: 'text-pink-400', bg: 'bg-pink-400/10' }
+                            { label: 'Posts Live', val: stats.postsPublished, icon: Send, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
+                            { label: 'DMs Handling', val: stats.dmsReplied, icon: MessageCircle, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-100' },
+                            { label: 'Engagement', val: formatNumber(totalEngagement), icon: Heart, color: 'text-pink-600', bg: 'bg-pink-50 border-pink-100' }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-gray-800 border border-gray-700 p-4 rounded-xl flex items-center justify-between">
+                            <div key={i} className="bg-surface border border-border p-4 rounded-xl flex items-center justify-between shadow-sm">
                                 <div>
-                                    <div className="text-2xl font-bold text-white mb-1">{stat.val}</div>
-                                    <div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{stat.label}</div>
+                                    <div className="text-2xl font-bold text-primary mb-1">{stat.val}</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-secondary font-bold">{stat.label}</div>
                                 </div>
-                                <div className={`p-2 rounded-lg ${stat.bg} ${stat.color}`}>
+                                <div className={`p-2 rounded-lg border ${stat.bg} ${stat.color}`}>
                                     <stat.icon className="w-5 h-5" />
                                 </div>
                             </div>
@@ -406,22 +395,22 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                     </div>
 
                     {/* INTELLIGENCE PANEL (Inbox/Logs) */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[600px]">
+                    <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm flex flex-col h-[600px]">
                         {/* Panel Tabs */}
-                        <div className="flex border-b border-gray-700">
+                        <div className="flex border-b border-border bg-gray-50/50">
                             <button
                                 onClick={() => setLeftPanelTab('inbox')}
-                                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${leftPanelTab === 'inbox' ? 'bg-gray-800 text-white border-b-2 border-blue-500' : 'bg-gray-900/50 text-gray-500 hover:bg-gray-800 hover:text-gray-300'
+                                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${leftPanelTab === 'inbox' ? 'bg-surface text-accent border-b-2 border-accent' : 'text-secondary hover:bg-gray-100 hover:text-primary'
                                     }`}
                             >
                                 <MessageSquare className="w-4 h-4" /> Live Inbox
                                 {filteredConversations.length > 0 && (
-                                    <span className="bg-blue-500 text-white text-[10px] px-1.5 rounded-full">{filteredConversations.length}</span>
+                                    <span className="bg-accent text-white text-[10px] px-1.5 rounded-full">{filteredConversations.length}</span>
                                 )}
                             </button>
                             <button
                                 onClick={() => setLeftPanelTab('terminal')}
-                                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${leftPanelTab === 'terminal' ? 'bg-gray-800 text-white border-b-2 border-green-500' : 'bg-gray-900/50 text-gray-500 hover:bg-gray-800 hover:text-gray-300'
+                                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${leftPanelTab === 'terminal' ? 'bg-surface text-green-600 border-b-2 border-green-500' : 'text-secondary hover:bg-gray-100 hover:text-primary'
                                     }`}
                             >
                                 <Terminal className="w-4 h-4" /> System Logs
@@ -429,27 +418,27 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                         </div>
 
                         {/* Panel Content */}
-                        <div className="flex-1 overflow-hidden relative bg-gray-900/50">
+                        <div className="flex-1 overflow-hidden relative bg-gray-50/30">
 
                             {/* VIEW: LIVE INBOX */}
                             {leftPanelTab === 'inbox' && (
                                 <div className="h-full overflow-y-auto p-4 space-y-4 scrollbar-thin">
                                     {filteredConversations.length === 0 ? (
-                                        <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
-                                            <MessageSquare className="w-12 h-12 mb-2" />
-                                            <p className="text-sm">Waiting for new messages on {activePlatform}...</p>
+                                        <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-70">
+                                            <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
+                                            <p className="text-sm font-medium">Waiting for new messages on {activePlatform}...</p>
                                         </div>
                                     ) : (
                                         filteredConversations.map((thread) => (
-                                            <div key={thread.id} className="bg-gray-800 border border-gray-700 rounded-xl p-4 animate-in slide-in-from-bottom-2 duration-300">
+                                            <div key={thread.id} className="bg-white border border-border rounded-xl p-4 shadow-sm animate-in slide-in-from-bottom-2 duration-300">
                                                 {/* Thread Header */}
-                                                <div className="flex justify-between items-start mb-3 border-b border-gray-700/50 pb-2">
+                                                <div className="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full ${thread.avatarColor} flex items-center justify-center text-white font-bold text-xs`}>
+                                                        <div className={`w-8 h-8 rounded-full ${thread.avatarColor} flex items-center justify-center text-white font-bold text-xs shadow-sm`}>
                                                             {thread.username.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="text-sm font-bold text-white flex items-center gap-2">
+                                                            <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
                                                                 {thread.username}
                                                                 <span className="text-gray-500 font-normal text-xs">{thread.userHandle}</span>
                                                             </div>
@@ -458,16 +447,16 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-[10px] text-gray-500">Just now</div>
+                                                    <div className="text-[10px] text-gray-400">Just now</div>
                                                 </div>
 
                                                 {/* Messages Area */}
                                                 <div className="space-y-3 pl-4">
                                                     {thread.messages.map((msg) => (
                                                         <div key={msg.id} className={`flex ${msg.isAgent ? 'justify-end' : 'justify-start'}`}>
-                                                            <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${msg.isAgent
-                                                                    ? 'bg-blue-600 text-white rounded-br-none'
-                                                                    : 'bg-gray-700 text-gray-200 rounded-bl-none'
+                                                            <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm shadow-sm ${msg.isAgent
+                                                                ? 'bg-blue-600 text-white rounded-br-none'
+                                                                : 'bg-gray-100 text-gray-800 rounded-bl-none'
                                                                 }`}>
                                                                 {msg.text}
                                                             </div>
@@ -477,10 +466,10 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                     {/* Typing Indicator */}
                                                     {thread.isTyping && (
                                                         <div className="flex justify-end">
-                                                            <div className="bg-gray-800 border border-gray-700 px-3 py-2 rounded-2xl rounded-br-none flex items-center gap-1">
-                                                                <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                                <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                                <div className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                                            <div className="bg-white border border-border px-3 py-2 rounded-2xl rounded-br-none flex items-center gap-1 shadow-sm">
+                                                                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                                             </div>
                                                         </div>
                                                     )}
@@ -493,10 +482,10 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
 
                             {/* VIEW: TERMINAL */}
                             {leftPanelTab === 'terminal' && (
-                                <div className="h-full p-4 font-mono text-xs overflow-y-auto scrollbar-thin space-y-2 bg-black">
+                                <div className="h-full p-4 font-mono text-xs overflow-y-auto scrollbar-thin space-y-2 bg-slate-900 text-slate-300 rounded-b-xl">
                                     {logs.map((log) => (
-                                        <div key={log.id} className="flex gap-3 text-gray-300">
-                                            <span className="text-gray-600 shrink-0">[{log.time}]</span>
+                                        <div key={log.id} className="flex gap-3">
+                                            <span className="text-slate-500 shrink-0">[{log.time}]</span>
                                             <span className={`
                                     ${log.type === 'success' ? 'text-green-400' : ''}
                                     ${log.type === 'info' ? 'text-blue-300' : ''}
@@ -517,9 +506,9 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                     </div>
                 </div>
 
-                {/* --- RIGHT COLUMN: Phone Preview (5 Cols) --- */}
+                {/* --- RIGHT COLUMN: Phone Preview (Remaining Dark to simulate screen) --- */}
                 <div className="lg:col-span-5 flex justify-center sticky top-24">
-                    <div className="relative w-[340px] h-[680px] bg-black rounded-[3rem] border-8 border-gray-800 shadow-2xl overflow-hidden flex flex-col">
+                    <div className="relative w-[300px] h-[600px] bg-black rounded-[2.5rem] border-8 border-gray-800 shadow-2xl overflow-hidden flex flex-col">
                         {/* Status Bar */}
                         <div className="h-8 bg-black w-full flex justify-between items-center px-6 pt-2 text-white text-[10px] z-10">
                             <span>9:41</span>
@@ -560,7 +549,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                         )}
 
                         {/* Feed Content */}
-                        <div className={`flex-1 overflow-y-auto scrollbar-hide bg-black text-white ${isImmersiveVideo ? 'snap-y snap-mandatory' : 'pb-20'}`}>
+                        <div className={`flex-1 min-h-0 overflow-y-auto scrollbar-hide bg-black text-white ${isImmersiveVideo ? 'snap-y snap-mandatory' : 'pb-20'}`}>
                             {feedPosts.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8 text-center">
                                     <Box className="w-12 h-12 mb-4 opacity-50" />
@@ -570,24 +559,22 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                 feedPosts.map((post) => {
                                     const metrics = postStats[post.id] || { likes: 0, comments: 0, shares: 0, saves: 0 };
 
-                                    // IMMERSIVE LAYOUT (TIKTOK / YOUTUBE SHORTS)
+                                    // IMMERSIVE LAYOUT
                                     if (isImmersiveVideo) {
                                         return (
                                             <div key={post.id} className="relative w-full h-full snap-start bg-gray-900 border-b border-gray-800">
-                                                {/* Full Screen Media */}
                                                 <div className="absolute inset-0 bg-gray-900">
                                                     {post.mediaType === 'video' ? (
                                                         <video src={post.imageUrl} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                                                     ) : (
                                                         <img src={post.imageUrl} alt="Post" className="w-full h-full object-cover" />
                                                     )}
-                                                    {/* Gradient overlay for readability */}
                                                     <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
                                                 </div>
 
-                                                {/* Right Sidebar Actions */}
+                                                {/* Action Sidebars and Text (Same as before) */}
                                                 <div className="absolute right-2 bottom-20 flex flex-col items-center gap-6 text-white z-10">
-                                                    {/* Profile Avatar (TikTok style) */}
+                                                    {/* (Icons logic preserved) */}
                                                     {isTikTok && (
                                                         <div className="relative mb-2">
                                                             <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-white overflow-hidden">
@@ -599,7 +586,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                         </div>
                                                     )}
 
-                                                    {/* Primary Like Action */}
                                                     <div className="flex flex-col items-center gap-1">
                                                         {isYoutube ? (
                                                             <ThumbsUp className={`w-7 h-7 drop-shadow-lg ${metrics.likes > 0 ? 'fill-white text-white' : 'text-white'}`} />
@@ -609,7 +595,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                         <span className="text-xs font-bold drop-shadow-md">{formatNumber(metrics.likes)}</span>
                                                     </div>
 
-                                                    {/* Dislike (YouTube only) */}
                                                     {isYoutube && (
                                                         <div className="flex flex-col items-center gap-1">
                                                             <ThumbsDown className="w-7 h-7 text-white drop-shadow-lg" />
@@ -617,13 +602,11 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                         </div>
                                                     )}
 
-                                                    {/* Comments */}
                                                     <div className="flex flex-col items-center gap-1">
                                                         <MessageCircle className={`fill-white/10 text-white drop-shadow-lg ${isYoutube ? 'w-7 h-7' : 'w-8 h-8'}`} />
                                                         <span className="text-xs font-bold drop-shadow-md">{formatNumber(metrics.comments)}</span>
                                                     </div>
 
-                                                    {/* Bookmark (TikTok Only) */}
                                                     {isTikTok && (
                                                         <div className="flex flex-col items-center gap-1">
                                                             <Bookmark className="w-8 h-8 fill-white/10 text-white drop-shadow-lg" />
@@ -631,13 +614,11 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                         </div>
                                                     )}
 
-                                                    {/* Share */}
                                                     <div className="flex flex-col items-center gap-1">
                                                         <Share2 className={`fill-white/10 text-white drop-shadow-lg ${isYoutube ? 'w-7 h-7' : 'w-8 h-8'}`} />
                                                         <span className="text-xs font-bold drop-shadow-md">{isYoutube ? 'Share' : formatNumber(metrics.shares)}</span>
                                                     </div>
 
-                                                    {/* Audio (TikTok Only) */}
                                                     {isTikTok && (
                                                         <div className="mt-2 animate-spin-slow rounded-full bg-gray-800 p-2 border border-gray-600">
                                                             <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center">
@@ -645,7 +626,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    {/* Sound (Youtube Only) */}
                                                     {isYoutube && (
                                                         <div className="mt-2 w-9 h-9 rounded-md bg-gray-800 border-2 border-white overflow-hidden">
                                                             <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-500 flex items-center justify-center text-[6px] font-bold">AI</div>
@@ -653,7 +633,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                     )}
                                                 </div>
 
-                                                {/* Bottom Info Area */}
                                                 <div className="absolute left-4 bottom-4 right-16 text-white z-10 text-left pb-16">
                                                     <div className="font-bold text-md mb-2 drop-shadow-md flex items-center gap-2">
                                                         @social_agent_ai
@@ -673,10 +652,9 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                         );
                                     }
 
-                                    // STANDARD LAYOUT (Instagram/Threads)
+                                    // STANDARD LAYOUT
                                     return (
                                         <div key={post.id} className="mb-6 border-b border-gray-800 pb-4">
-                                            {/* Post Header */}
                                             <div className="flex items-center justify-between px-3 py-3">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-purple-600 p-[2px]">
@@ -689,7 +667,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                 <MoreHorizontal className="w-5 h-5 text-gray-400" />
                                             </div>
 
-                                            {/* Media */}
                                             <div className="w-full bg-gray-900 aspect-square flex items-center justify-center overflow-hidden">
                                                 {post.mediaType === 'video' ? (
                                                     <div className="relative w-full h-full bg-black">
@@ -703,7 +680,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                 )}
                                             </div>
 
-                                            {/* Actions */}
                                             <div className="px-3 pt-3 flex justify-between items-center">
                                                 <div className="flex gap-4">
                                                     <Heart className={`w-6 h-6 ${metrics.likes > 0 ? 'fill-red-500 text-red-500' : 'text-white'}`} />
@@ -713,12 +689,10 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                                 <Bookmark className="w-6 h-6 text-white" />
                                             </div>
 
-                                            {/* Likes */}
                                             <div className="px-3 py-2 text-sm font-semibold">
                                                 {formatNumber(metrics.likes)} likes
                                             </div>
 
-                                            {/* Caption */}
                                             <div className="px-3 text-sm">
                                                 <span className="font-semibold mr-2">social_agent_ai</span>
                                                 <span className="text-gray-100">{post.generatedCaption}</span>
@@ -737,7 +711,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                 })
                             )}
 
-                            {/* End of Feed Indicator (Non-Immersive only) */}
                             {feedPosts.length > 0 && !isImmersiveVideo && (
                                 <div className="py-10 text-center text-gray-600 text-xs flex flex-col items-center">
                                     <CheckCircle className="w-6 h-6 mb-2 text-gray-700" />
@@ -746,10 +719,9 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                             )}
                         </div>
 
-                        {/* Bottom Nav Bar */}
+                        {/* Bottom Nav Bar (Preserved) */}
                         <div className={`h-16 border-t flex justify-around items-center px-2 z-10 ${isImmersiveVideo ? 'bg-black border-gray-800 text-white' : 'bg-black border-gray-800'}`}>
                             {isTikTok ? (
-                                // TIKTOK NAV
                                 <>
                                     <div className="p-2 flex flex-col items-center gap-1 cursor-pointer">
                                         <div className="w-5 h-5 bg-white/10 rounded-sm flex items-center justify-center"><Box className="w-3 h-3 text-white" /></div>
@@ -760,7 +732,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                         <span className="text-[9px]">Friends</span>
                                     </div>
                                     <div className="p-0 mx-2 cursor-pointer transform hover:scale-105 transition-transform">
-                                        {/* Custom TikTok Plus Button */}
                                         <div className="w-11 h-7 bg-white rounded-lg relative flex items-center justify-center">
                                             <div className="absolute left-0.5 w-full h-full bg-cyan-400 rounded-lg -z-10 translate-x-[-2px]"></div>
                                             <div className="absolute right-0.5 w-full h-full bg-red-500 rounded-lg -z-10 translate-x-[2px]"></div>
@@ -779,7 +750,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                     </div>
                                 </>
                             ) : isYoutube ? (
-                                // YOUTUBE NAV
                                 <>
                                     <div className="p-2 flex flex-col items-center gap-1 cursor-pointer">
                                         <Home className="w-5 h-5" />
@@ -804,7 +774,6 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                     </div>
                                 </>
                             ) : (
-                                // INSTA/THREADS NAV
                                 <>
                                     <div className="p-2 flex flex-col items-center gap-1 cursor-pointer">
                                         <Home className="w-5 h-5 text-white fill-white" />

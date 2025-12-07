@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import type { PostDraft, WorkflowConfig } from '../types';
+import type { PostDraft, WorkflowConfig, PostType } from '../types';
 import { generateImageForPost, generatePostContent } from '../services/geminiService';
 import {
     ArrowLeft,
     RefreshCw,
     Image as ImageIcon,
-    CheckCircle,
     Hash,
     Wand2,
     Upload,
@@ -31,8 +30,6 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
 
     const handleGenerateTextDetails = async (postId: number) => {
         const post = posts.find(p => p.id === postId);
-
-        // Allow generation if Topic exists OR File exists
         if (!post || (!post.topic.trim() && !post.uploadedFileBase64)) {
             alert("Please enter a topic or upload media first.");
             return;
@@ -45,12 +42,18 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                 ? { data: post.uploadedFileBase64, mimeType: post.uploadedFileMimeType }
                 : undefined;
 
-            const details = await generatePostContent(post.topic, post.platform, media);
+            // Pass Business Context to Service
+            const details = await generatePostContent(
+                post.topic,
+                post.platform,
+                { name: config.businessName, description: config.businessDescription },
+                media
+            );
 
             setPosts(prev => prev.map(p =>
                 p.id === postId ? {
                     ...p,
-                    type: details.type,
+                    type: details.type as PostType,
                     captionStarter: details.captionStarter,
                     generatedCaption: details.generatedCaption,
                     hashtags: details.hashtags,
@@ -83,18 +86,13 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Reset input value to allow re-uploading the same file
         e.target.value = '';
-
-        // Create object URL for preview
         const url = URL.createObjectURL(file);
         const isVideo = file.type.startsWith('video');
 
-        // Read file as Base64 for API
         const reader = new FileReader();
         reader.onloadend = () => {
             const result = reader.result as string;
-            // Check if result is valid data URI
             if (!result || !result.includes(',')) return;
 
             const base64String = result.split(',')[1];
@@ -123,7 +121,6 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
         if (currentIdx < posts.length - 1) {
             setCurrentIdx(c => c + 1);
         } else {
-            // Trigger finish when on the last post
             onFinish(posts);
         }
     };
@@ -132,40 +129,39 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
         if (currentIdx > 0) setCurrentIdx(c => c - 1);
     };
 
-    if (!currentPost) return <div className="p-10 text-center">Loading planner...</div>;
+    if (!currentPost) return <div className="p-10 text-center text-secondary">Loading planner...</div>;
 
     return (
-        <div className="h-full bg-gray-50 flex flex-col max-w-5xl mx-auto shadow-xl bg-white">
+        <div className="h-full bg-background flex flex-col shadow-none">
 
             {/* Header */}
-            <div className="bg-white px-6 py-4 border-b border-gray-100 sticky top-0 z-10">
+            <div className="bg-surface px-6 py-5 border-b border-border sticky top-0 z-10">
                 <button
                     onClick={onBack}
-                    className="flex items-center text-gray-500 hover:text-gray-800 transition-colors text-sm mb-4"
+                    className="flex items-center text-secondary hover:text-primary transition-colors text-sm mb-4"
                 >
                     <ArrowLeft className="w-4 h-4 mr-1" /> Back
                 </button>
 
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Workflow Planner</h1>
-                        <p className="text-gray-500 mt-1 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                        <h1 className="text-2xl font-bold text-primary">Workflow Planner</h1>
+                        <p className="text-secondary text-sm mt-1 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-accent"></span>
                             {posts.length} posts • {config.platforms.join(', ')}
                         </p>
                     </div>
                     <div className="text-right">
-                        <div className="text-4xl font-bold text-orange-600">
-                            {currentIdx + 1}<span className="text-gray-300 text-2xl">/{posts.length}</span>
+                        <div className="text-3xl font-bold text-accent">
+                            {currentIdx + 1}<span className="text-gray-300 text-xl">/{posts.length}</span>
                         </div>
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wide">Drafting</div>
                     </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-1.5 bg-gray-100 rounded-full mt-6 overflow-hidden">
+                <div className="w-full h-1 bg-gray-100 rounded-full mt-6 overflow-hidden">
                     <div
-                        className="h-full bg-orange-500 transition-all duration-300 ease-out"
+                        className="h-full bg-accent transition-all duration-300 ease-out"
                         style={{ width: `${((currentIdx + 1) / posts.length) * 100}%` }}
                     />
                 </div>
@@ -177,24 +173,23 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                 {/* Post Meta Header */}
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 border border-blue-200">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
                             <TypeIcon className="w-4 h-4" />
                         </div>
-                        <span className="font-bold text-gray-900 text-lg">Post {currentPost.id}</span>
+                        <span className="font-bold text-primary text-lg">Post {currentPost.id}</span>
                         <span className="text-gray-300">•</span>
-                        <span className="text-gray-500">{currentPost.platform}</span>
+                        <span className="text-secondary">{currentPost.platform}</span>
                     </div>
-                    <div className="text-gray-400 text-sm flex items-center gap-2 border px-3 py-1 rounded-full">
+                    <div className="text-secondary text-sm flex items-center gap-2 border border-border px-3 py-1 rounded-full bg-surface">
                         <Clock className="w-4 h-4" />
                         {currentPost.scheduledTime ? `Scheduled: ${currentPost.scheduledTime}` : 'Unscheduled'}
                     </div>
                 </div>
 
                 {/* TOPIC INPUT SECTION */}
-                <div className="bg-white p-6 rounded-2xl border border-orange-100 shadow-sm space-y-4">
+                <div className="bg-surface p-6 rounded-xl border border-border shadow-sm space-y-4">
                     <div>
-                        <label className="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2 mb-2">
-                            <span className="w-2 h-4 bg-orange-500 rounded-full"></span>
+                        <label className="text-xs font-bold text-secondary uppercase tracking-wide flex items-center gap-2 mb-2">
                             Step 1: Content Input
                         </label>
                         <div className="flex flex-col md:flex-row gap-3">
@@ -204,10 +199,10 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                     value={currentPost.topic}
                                     placeholder="Enter a topic..."
                                     onChange={(e) => handleUpdatePost('topic', e.target.value)}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-14 py-4 text-gray-900 font-medium text-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all placeholder-gray-400"
+                                    className="w-full bg-background border border-border rounded-lg pl-4 pr-14 py-3 text-primary font-medium focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all placeholder-gray-400"
                                 />
                                 <label
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white border border-gray-200 rounded-lg text-gray-400 hover:text-orange-500 hover:border-orange-300 cursor-pointer transition-all shadow-sm"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white border border-border rounded-lg text-secondary hover:text-accent hover:border-accent cursor-pointer transition-all shadow-sm"
                                     title="Upload Image/Video"
                                 >
                                     <input
@@ -216,14 +211,14 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                         accept="image/*,video/*"
                                         onChange={(e) => handleFileUpload(e, currentPost.id)}
                                     />
-                                    <Upload className="w-5 h-5" />
+                                    <Upload className="w-4 h-4" />
                                 </label>
                             </div>
 
                             <button
                                 onClick={() => handleGenerateTextDetails(currentPost.id)}
                                 disabled={(!currentPost.topic && !currentPost.uploadedFileBase64) || currentPost.isGeneratingText}
-                                className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-200 disabled:text-gray-400 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md whitespace-nowrap min-w-[180px]"
+                                className="bg-accent hover:bg-amber-700 disabled:bg-gray-200 disabled:text-gray-400 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all shadow-sm whitespace-nowrap min-w-[160px]"
                             >
                                 {currentPost.isGeneratingText ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -233,17 +228,11 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                 {currentPost.uploadedFileBase64 ? 'Analyze Media' : 'Generate'}
                             </button>
                         </div>
-                        <p className="text-xs text-gray-400 mt-2 ml-1 flex items-center gap-1">
-                            {currentPost.uploadedFileBase64
-                                ? <><CheckCircle className="w-3 h-3 text-green-500" /> Media attached! Click 'Analyze Media' to generate captions.</>
-                                : "Enter a topic or click the upload icon to attach media."
-                            }
-                        </p>
                     </div>
                 </div>
 
                 {/* Visual Preview Area */}
-                <div className="w-full aspect-video sm:aspect-[2/1] bg-gray-100 rounded-2xl overflow-hidden relative group border border-gray-200">
+                <div className="w-full aspect-video sm:aspect-[2/1] bg-surface rounded-xl overflow-hidden relative group border border-border">
                     {currentPost.imageUrl ? (
                         <>
                             {currentPost.mediaType === 'video' ? (
@@ -258,7 +247,7 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                     </div>
                                 </div>
                             ) : (
-                                <div className="w-full h-full relative bg-gray-900">
+                                <div className="w-full h-full relative bg-gray-100">
                                     <img
                                         src={currentPost.imageUrl}
                                         alt="Preview"
@@ -283,13 +272,13 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                             </button>
                         </>
                     ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-slate-50 relative p-6">
+                        <div className="w-full h-full flex flex-col items-center justify-center text-secondary bg-gray-50/50 relative p-6">
 
                             {/* AI Loading State */}
                             {currentPost.isGeneratingImage ? (
                                 <div className="flex flex-col items-center animate-pulse">
-                                    <Wand2 className="w-10 h-10 mb-2 text-orange-400 animate-spin" />
-                                    <span className="text-sm font-medium text-orange-500">AI is crafting your image...</span>
+                                    <Wand2 className="w-10 h-10 mb-2 text-accent animate-spin" />
+                                    <span className="text-sm font-medium text-accent">AI is crafting your image...</span>
                                 </div>
                             ) : (
                                 /* Initial Empty State Options */
@@ -297,8 +286,8 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                     {config.contentSource === 'AI Generated' ? (
                                         <div className="space-y-4">
                                             <div className="mb-4">
-                                                <ImageIcon className="w-16 h-16 mx-auto mb-2 opacity-20" />
-                                                <p className="text-gray-500 text-sm">
+                                                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                                <p className="text-secondary text-sm">
                                                     {currentPost.topic
                                                         ? `Ready to generate image for "${currentPost.topic}"`
                                                         : "Enter a topic above first."}
@@ -308,15 +297,15 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                                 <button
                                                     onClick={() => handleGenerateImage(currentPost.id)}
                                                     disabled={!currentPost.topic}
-                                                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 mx-auto transition-all shadow-lg hover:scale-105"
+                                                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white px-6 py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 mx-auto transition-all shadow-md hover:scale-105"
                                                 >
                                                     <Wand2 className="w-5 h-5" />
                                                     Generate AI Image
                                                 </button>
                                                 <div className="text-xs text-gray-400 font-medium divider flex items-center gap-2 justify-center my-1">
-                                                    <span className="h-px w-8 bg-gray-200"></span> OR <span className="h-px w-8 bg-gray-200"></span>
+                                                    <span className="h-px w-8 bg-gray-300"></span> OR <span className="h-px w-8 bg-gray-300"></span>
                                                 </div>
-                                                <label className="cursor-pointer bg-white border border-gray-200 hover:border-orange-500 hover:text-orange-600 text-gray-600 px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
+                                                <label className="cursor-pointer bg-white border border-border hover:border-accent hover:text-accent text-secondary px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm">
                                                     <span className="font-semibold flex items-center gap-2 text-sm"><Upload className="w-4 h-4" /> Upload Media Instead</span>
                                                     <input
                                                         type="file"
@@ -330,10 +319,10 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                                     ) : (
                                         <div className="space-y-4">
                                             <div className="mb-4">
-                                                <Upload className="w-16 h-16 mx-auto mb-2 opacity-20" />
-                                                <p className="text-gray-500 text-sm">Upload your content to schedule.</p>
+                                                <Upload className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                                <p className="text-secondary text-sm">Upload your content to schedule.</p>
                                             </div>
-                                            <label className="cursor-pointer bg-white border-2 border-dashed border-orange-200 hover:border-orange-500 text-orange-600 px-8 py-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:bg-orange-50">
+                                            <label className="cursor-pointer bg-white border-2 border-dashed border-border hover:border-accent text-accent px-8 py-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:bg-orange-50/50">
                                                 <span className="font-semibold flex items-center gap-2"><Upload className="w-4 h-4" /> Upload Video or Image</span>
                                                 <input
                                                     type="file"
@@ -358,15 +347,15 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                         {/* Post Type & Time Row */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Post Type</label>
+                                <label className="text-xs font-semibold text-secondary uppercase tracking-wider">Post Type</label>
                                 <div className="flex bg-gray-100 p-1 rounded-lg">
                                     {['Photo Post', 'Reel'].map((type) => (
                                         <button
                                             key={type}
                                             onClick={() => handleUpdatePost('type', type)}
                                             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${currentPost.type === type
-                                                    ? 'bg-white text-orange-600 shadow-sm ring-1 ring-black/5'
-                                                    : 'text-gray-500 hover:text-gray-700'
+                                                ? 'bg-white text-accent shadow-sm ring-1 ring-black/5'
+                                                : 'text-secondary hover:text-primary'
                                                 }`}
                                         >
                                             {type}
@@ -376,13 +365,13 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled Time</label>
+                                <label className="text-xs font-semibold text-secondary uppercase tracking-wider">Scheduled Time</label>
                                 <div className="relative">
                                     <input
                                         type="time"
                                         value={currentPost.scheduledTime}
                                         onChange={(e) => handleUpdatePost('scheduledTime', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-3 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none text-sm font-medium"
+                                        className="w-full bg-surface border border-border rounded-lg pl-3 pr-3 py-2 text-primary focus:ring-2 focus:ring-accent outline-none text-sm font-medium"
                                     />
                                 </div>
                             </div>
@@ -390,27 +379,27 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
 
                         {/* AI Caption */}
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex justify-between">
+                            <label className="text-xs font-semibold text-secondary uppercase tracking-wider flex justify-between">
                                 <span>Caption</span>
-                                <span className="text-orange-500 text-[10px] bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">Optimized for engagement</span>
+                                <span className="text-accent text-[10px] bg-accent/10 px-2 py-0.5 rounded-full border border-accent/20">Optimized for engagement</span>
                             </label>
                             <textarea
                                 value={currentPost.generatedCaption}
                                 onChange={(e) => handleUpdatePost('generatedCaption', e.target.value)}
                                 rows={5}
                                 placeholder="Caption will appear here after generation..."
-                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 leading-relaxed focus:ring-2 focus:ring-orange-500 outline-none resize-none"
+                                className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-primary leading-relaxed focus:ring-2 focus:ring-accent outline-none resize-none"
                             />
                         </div>
 
                         {/* Hashtags */}
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hashtags</label>
+                                <label className="text-xs font-semibold text-secondary uppercase tracking-wider">Hashtags</label>
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {currentPost.hashtags.length > 0 ? currentPost.hashtags.map((tag, i) => (
-                                    <span key={i} className="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-orange-100 flex items-center">
+                                    <span key={i} className="bg-accent/10 text-accent px-3 py-1.5 rounded-lg text-sm font-medium border border-accent/20 flex items-center">
                                         <Hash className="w-3 h-3 mr-0.5 opacity-50" />
                                         {tag.replace('#', '')}
                                     </span>
@@ -424,8 +413,8 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                     </div>
 
                     {/* Sidebar / Context */}
-                    <div className="hidden md:block border-l border-gray-100 pl-6 space-y-6">
-                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <div className="hidden md:block border-l border-border pl-6 space-y-6">
+                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                             <h4 className="text-blue-800 font-semibold text-sm mb-2">Workflow Guide</h4>
                             <ul className="text-blue-600 text-xs leading-5 list-disc pl-4 space-y-1">
                                 <li>Enter your main topic <strong>OR</strong> upload a file.</li>
@@ -441,11 +430,11 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
             </div>
 
             {/* Footer Nav */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 shadow-lg flex justify-between items-center">
+            <div className="sticky bottom-0 bg-surface border-t border-border p-4 shadow-sm flex justify-between items-center z-10">
                 <button
                     onClick={handlePrev}
                     disabled={currentIdx === 0}
-                    className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-2.5 rounded-lg font-medium text-secondary hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-border bg-white"
                 >
                     Previous
                 </button>
@@ -454,14 +443,14 @@ const WorkflowPlanner: React.FC<Props> = ({ config, initialPosts, onBack, onFini
                     {posts.map((_, idx) => (
                         <div
                             key={idx}
-                            className={`w-2 h-2 rounded-full transition-all ${idx === currentIdx ? 'bg-orange-500 w-4' : 'bg-gray-300'}`}
+                            className={`w-2 h-2 rounded-full transition-all ${idx === currentIdx ? 'bg-accent w-4' : 'bg-gray-300'}`}
                         />
                     ))}
                 </div>
 
                 <button
                     onClick={handleNext}
-                    className="px-8 py-2.5 rounded-lg font-bold text-white bg-orange-600 hover:bg-orange-700 shadow-md transform active:scale-95 transition-all"
+                    className="px-8 py-2.5 rounded-lg font-bold text-white bg-accent hover:bg-amber-700 shadow-sm transform active:scale-95 transition-all"
                 >
                     {currentIdx === posts.length - 1 ? 'Finish & Schedule' : 'Next Post'}
                 </button>

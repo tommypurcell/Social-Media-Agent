@@ -1,254 +1,85 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { GitBranch, Sparkles, Image as ImageIcon, Video, MessageSquare, Hash } from 'lucide-react';
+import { useAgentContext } from '../lib/AgentContext';
+import { generateBranchesForContent } from '../lib/utils';
+import type { ContentBranch } from '../lib/types';
 
-interface BranchNode {
-    id: string;
-    parentId?: string;
-    name: string;
-    caption: string;
-    mediaUrl?: string;
-    platform: 'instagram' | 'tiktok' | 'threads' | 'twitter' | 'linkedin';
+interface BranchNode extends Omit<ContentBranch, 'platform'> {
+    platform: 'instagram' | 'tiktok' | 'threads' | 'twitter' | 'linkedin'; // extended platform types
     type: 'image' | 'video' | 'text';
-    isSelected: boolean;
-    depth: number;
     children: BranchNode[];
+    depth: number;
 }
 
 const ContentBranches = () => {
-    // Mock data: 10 diverse content items with branches
-    const [branches, setBranches] = useState<BranchNode[]>([
-        {
-            id: '1',
-            name: 'Product Launch Teaser',
-            caption: 'Something big is coming... 🚀 #NewEra',
-            mediaUrl: '/assets/videos/science.mp4',
-            platform: 'instagram',
-            type: 'video',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '1a',
-                    parentId: '1',
-                    name: 'BTS Video Variant',
-                    caption: 'Behind the scenes of our secret project 🤫 #BTS',
-                    mediaUrl: '/assets/videos/google_test.mp4',
-                    platform: 'tiktok',
-                    type: 'video',
-                    isSelected: false,
-                    depth: 1,
-                    children: []
-                },
-                {
-                    id: '1b',
-                    parentId: '1',
-                    name: 'Cryptic Thread',
-                    caption: 'You are not ready for this Tuesday. 💭',
-                    platform: 'threads',
-                    type: 'text',
-                    isSelected: false,
-                    depth: 1,
-                    children: []
+    const { state } = useAgentContext();
+
+    // Transform AgentContext tasks into BranchNodes
+    const branches = useMemo(() => {
+        const contentTasks = state.tasks.filter(t =>
+            ['post_content', 'plan_content', 'generate_media'].includes(t.type)
+        );
+
+        if (contentTasks.length === 0) return [];
+
+        const allTrees: BranchNode[] = [];
+
+        contentTasks.forEach(task => {
+            const flatBranches = generateBranchesForContent(task, task.metadata);
+
+            // Map to BranchNode structure
+            const nodeMap = new Map<string, BranchNode>();
+
+            // First pass: create nodes
+            flatBranches.forEach(b => {
+                nodeMap.set(b.id, {
+                    ...b,
+                    platform: b.platform as any,
+                    type: b.postType === 'reel' ? 'video' : 'image', // simplified mapping
+                    children: [],
+                    depth: 0 // temporary
+                });
+            });
+
+            // Second pass: build hierarchy
+            flatBranches.forEach(b => {
+                const node = nodeMap.get(b.id)!;
+                if (b.parentId && nodeMap.has(b.parentId)) {
+                    const parent = nodeMap.get(b.parentId)!;
+                    parent.children.push(node);
+                } else if (!b.parentId) {
+                    allTrees.push(node);
                 }
-            ]
-        },
-        {
-            id: '2',
-            name: 'Monday Motivation',
-            caption: 'Discipline chooses what you want most over what you want now. 💪',
-            mediaUrl: 'https://images.pexels.com/photos/3755761/pexels-photo-3755761.jpeg?auto=compress&cs=tinysrgb&w=600',
-            platform: 'instagram',
-            type: 'image',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '2a',
-                    parentId: '2',
-                    name: 'Short Quote Thread',
-                    caption: 'Discipline > Motivation.',
-                    platform: 'threads',
-                    type: 'text',
-                    isSelected: true,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '3',
-            name: 'Tech Tip Tuesday',
-            caption: '3 shortcuts that will save you hours this week ⚡️',
-            mediaUrl: '/assets/videos/google_test.mp4',
-            platform: 'tiktok',
-            type: 'video',
-            isSelected: false,
-            depth: 0,
-            children: [
-                {
-                    id: '3a',
-                    parentId: '3',
-                    name: 'Carousel Version',
-                    caption: 'Swipe to save time ➡️',
-                    mediaUrl: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=600',
-                    platform: 'instagram',
-                    type: 'image',
-                    isSelected: true,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '4',
-            name: 'Customer Spotlight',
-            caption: 'Loving how @Sarah uses our dashboard for her agency! ❤️',
-            mediaUrl: 'https://images.pexels.com/photos/3184655/pexels-photo-3184655.jpeg?auto=compress&cs=tinysrgb&w=600',
-            platform: 'instagram',
-            type: 'image',
-            isSelected: true,
-            depth: 0,
-            children: []
-        },
-        {
-            id: '5',
-            name: 'Office Tour',
-            caption: 'Welcome to our HQ! Where the magic happens ✨',
-            mediaUrl: '/assets/videos/dance.mp4',
-            platform: 'tiktok',
-            type: 'video',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '5a',
-                    parentId: '5',
-                    name: 'Photo Dump',
-                    caption: 'Office aesthetics 🌿🖥️',
-                    mediaUrl: 'https://images.pexels.com/photos/7070/space-desk-workspace-coworking.jpg?auto=compress&cs=tinysrgb&w=600',
-                    platform: 'instagram',
-                    type: 'image',
-                    isSelected: false,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '6',
-            name: 'Flash Sale Alert',
-            caption: '24 HOURS ONLY. 50% OFF. GO! 🚨',
-            platform: 'twitter',
-            type: 'text',
-            isSelected: false,
-            depth: 0,
-            children: [
-                {
-                    id: '6a',
-                    parentId: '6',
-                    name: 'Urgency Reel',
-                    caption: 'Do not miss this! ⏰',
-                    mediaUrl: '/assets/videos/test_mixkit.mp4',
-                    platform: 'instagram',
-                    type: 'video',
-                    isSelected: true,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '7',
-            name: 'Industry News',
-            caption: 'AI usage in marketing has doubled in 2024. Here is what that means for you.',
-            platform: 'linkedin',
-            type: 'text',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '7a',
-                    parentId: '7',
-                    name: 'Visual Chart',
-                    caption: 'The stats speak for themselves 📈',
-                    mediaUrl: 'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=600',
-                    platform: 'instagram',
-                    type: 'image',
-                    isSelected: false,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '8',
-            name: 'Employee Spotlight',
-            caption: 'Meet Alex, our lead designer! 🎨',
-            mediaUrl: '/assets/videos/kids.mp4',
-            platform: 'instagram',
-            type: 'video',
-            isSelected: true,
-            depth: 0,
-            children: []
-        },
-        {
-            id: '9',
-            name: 'Weekend Vibes',
-            caption: 'Logging off. See you Monday! ✌️',
-            mediaUrl: '/assets/videos/travel.mp4',
-            platform: 'instagram',
-            type: 'video',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '9a',
-                    parentId: '9',
-                    name: 'Casual Check-in',
-                    caption: 'Any fun weekend plans? 👇',
-                    platform: 'threads',
-                    type: 'text',
-                    isSelected: false,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        },
-        {
-            id: '10',
-            name: 'Educational Deep Dive',
-            caption: 'How to build your personal brand in 5 steps. A thread. 🧵',
-            platform: 'threads',
-            type: 'text',
-            isSelected: true,
-            depth: 0,
-            children: [
-                {
-                    id: '10a',
-                    parentId: '10',
-                    name: 'Talking Head Video',
-                    caption: 'Personal branding 101 🧠',
-                    mediaUrl: '/assets/videos/art.mp4',
-                    platform: 'tiktok',
-                    type: 'video',
-                    isSelected: true,
-                    depth: 1,
-                    children: []
-                }
-            ]
-        }
-    ]);
+            });
+        });
+
+        // Helper to set depth recursively
+        const setDepth = (node: BranchNode, d: number) => {
+            node.depth = d;
+            node.children.forEach(c => setDepth(c, d + 1));
+        };
+
+        allTrees.forEach(root => setDepth(root, 0));
+        return allTrees;
+
+    }, [state.tasks]);
+
+    // Local state to handle branch toggling (visual only since we don't persist selection back to context yet in this view)
+    // In a real app, this would dispatch an action to update the task/post metadata
+    const [localSelections, setLocalSelections] = useState<Set<string>>(new Set());
 
     const toggleSelection = (branchId: string) => {
-        const updateBranches = (nodes: BranchNode[]): BranchNode[] => {
-            return nodes.map(node => {
-                if (node.id === branchId) {
-                    return { ...node, isSelected: !node.isSelected };
-                }
-                return { ...node, children: updateBranches(node.children) };
-            });
-        };
-        setBranches(updateBranches(branches));
+        setLocalSelections(prev => {
+            const next = new Set(prev);
+            if (next.has(branchId)) next.delete(branchId);
+            else next.add(branchId);
+            return next;
+        });
+    };
+
+    const isSelected = (branch: BranchNode) => {
+        // Fallback to local state if tracking changes, otherwise default to branch.isSelected
+        return localSelections.has(branch.id) || (localSelections.size === 0 && branch.isSelected);
     };
 
     const getPlatformIcon = (platform: string) => {
@@ -272,6 +103,7 @@ const ContentBranches = () => {
 
     const renderBranch = (branch: BranchNode) => {
         const hasChildren = branch.children.length > 0;
+        const selected = isSelected(branch);
 
         return (
             <div key={branch.id} className="relative group">
@@ -289,9 +121,9 @@ const ContentBranches = () => {
                     <button
                         onClick={() => toggleSelection(branch.id)}
                         className={`mt-4 w-5 h-5 rounded border transition-colors flex items-center justify-center
-                            ${branch.isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 hover:border-gray-400'}`}
+                            ${selected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 hover:border-gray-400'}`}
                     >
-                        {branch.isSelected && <Sparkles size={12} className="text-white" />}
+                        {selected && <Sparkles size={12} className="text-white" />}
                     </button>
 
 
@@ -384,7 +216,15 @@ const ContentBranches = () => {
 
                 {/* Main List */}
                 <div className="space-y-2">
-                    {branches.map(branch => renderBranch(branch))}
+                    {branches.length > 0 ? (
+                        branches.map(branch => renderBranch(branch))
+                    ) : (
+                        <div className="text-center py-20 bg-white rounded-xl border border-gray-200 border-dashed">
+                            <GitBranch className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900">No content branches found</h3>
+                            <p className="text-gray-500 mt-2">Create a workflow in the Planner to see content variations here.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

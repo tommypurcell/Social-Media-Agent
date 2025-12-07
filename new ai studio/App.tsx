@@ -80,8 +80,9 @@ const App: React.FC = () => {
         />
       )}
 
-      {currentStep === 'simulation' && (
+      {currentStep === 'simulation' && config && (
         <AgentSimulation 
+          config={config}
           posts={posts} 
           onReset={() => setCurrentStep('config')} 
         />

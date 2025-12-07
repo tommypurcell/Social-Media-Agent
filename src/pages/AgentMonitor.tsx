@@ -8,65 +8,18 @@ const AgentMonitor = () => {
 
     // ... (existing useEffect for location.state remains somewhat relevant but could be cleaned if NewWorkflowModal was the only source, but keeping it for safety as other flows might use it)
 
-    // DUMMY DATA GENERATION
-    const dummyTasks = [
-        {
-            id: 'dummy-1',
-            title: 'Analyze optimal posting time',
-            status: 'completed',
-            stage: 'ANALYSIS',
-            progress: 100,
-            platform: 'All',
-            thumbnail: null,
-            timestamp: Date.now() - 1000 * 60 * 30 // 30 mins ago
-        },
-        {
-            id: 'dummy-2',
-            title: 'Generate captions for "Summer Launch"',
-            status: 'completed',
-            stage: 'CONTENT_GEN',
-            progress: 100,
-            platform: 'Instagram',
-            thumbnail: null,
-            timestamp: Date.now() - 1000 * 60 * 60 // 1 hour ago
-        },
-        {
-            id: 'dummy-3',
-            title: 'Upload: Product Teaser Video',
-            status: 'queued',
-            stage: 'UPLOAD',
-            progress: 0,
-            platform: 'TikTok',
-            thumbnail: null,
-            timestamp: Date.now() + 1000 * 60 * 60 * 2 // In 2 hours (Scheduled/Queued)
-        },
-        {
-            id: 'dummy-4',
-            title: 'Cross-post to Threads',
-            status: 'queued',
-            stage: 'DISTRIBUTION',
-            progress: 0,
-            platform: 'Threads',
-            thumbnail: null,
-            timestamp: Date.now() + 1000 * 60 * 60 * 3 // In 3 hours
-        }
-    ];
-
-    // Combine real and dummy tasks
-    const activeTasks = [
-        ...state.tasks.map(task => ({
-            id: task.id,
-            title: task.description.split(':')[1] || task.description,
-            status: task.status === 'in_progress' ? 'processing' : task.status === 'pending' ? 'queued' : task.status,
-            stage: task.type.replace('_', ' ').toUpperCase(),
-            progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
-            platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
-                task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
-            thumbnail: null,
-            timestamp: task.completedAt || task.createdAt
-        })),
-        ...(state.tasks.length === 0 ? dummyTasks : [])
-    ];
+    // Map real tasks
+    const activeTasks = state.tasks.map(task => ({
+        id: task.id,
+        title: task.description.split(':')[1] || task.description,
+        status: task.status === 'in_progress' ? 'processing' : task.status === 'pending' ? 'queued' : task.status,
+        stage: task.type.replace('_', ' ').toUpperCase(),
+        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
+        platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
+            task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
+        thumbnail: null,
+        timestamp: task.completedAt || task.createdAt
+    }));
 
     // ... (getGreeting)
 
@@ -111,7 +64,7 @@ const AgentMonitor = () => {
                             ) : (
                                 <>
                                     <Play className="w-4 h-4 fill-current" />
-                                    Start Agent
+                                    Start Agent Loop
                                 </>
                             )}
                         </button>
@@ -217,7 +170,13 @@ const AgentMonitor = () => {
                         {activeTasks.length === 0 && (
                             <div className="text-center py-12 text-secondary">
                                 <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                                <p>No activity yet. Start the agent to see the timeline.</p>
+                                <p className="mb-4">No activity yet. Start a new workflow to get started.</p>
+                                <button
+                                    onClick={() => toggleAgent()}
+                                    className="px-6 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors shadow-sm"
+                                >
+                                    Start Agent
+                                </button>
                             </div>
                         )}
                     </div>

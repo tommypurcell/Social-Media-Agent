@@ -59,7 +59,7 @@ const Landing = () => {
 
                 <div className="max-w-7xl mx-auto px-6 relative">
                     {/* Video Marquee Container - Positioned as a dynamic background layer */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[900px] hidden xl:block overflow-hidden pointer-events-none fade-mask z-0 opacity-90">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[75%] h-[900px] hidden xl:block overflow-hidden pointer-events-none z-0 opacity-90 [mask-image:linear-gradient(to_right,transparent_0%,black_15%)]">
                         <div className="rotate-y-12 transform-3d scale-110">
                             <VideoMarquee />
                         </div>

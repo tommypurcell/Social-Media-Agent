@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import WorkflowConfigModal from '../../ai-studio/components/WorkflowConfigModal';
-import WorkflowPlanner from '../../ai-studio/components/WorkflowPlanner';
-import AgentSimulation from '../../ai-studio/components/AgentSimulation';
-import type { WorkflowConfig as StudioWorkflowConfig, PostDraft, Platform } from '../../ai-studio/types';
+import WorkflowConfigModal from '../ai-studio/components/WorkflowConfigModal';
+import WorkflowPlanner from '../ai-studio/components/WorkflowPlanner';
+import AgentSimulation from '../ai-studio/components/AgentSimulation';
+import type { WorkflowConfig as StudioWorkflowConfig, PostDraft, Platform } from '../ai-studio/types';
 import { useAgentContext } from '../lib/AgentContext';
 
 type Step = 'config' | 'planning' | 'simulation';
@@ -18,7 +18,8 @@ const createEmptyDrafts = (config: StudioWorkflowConfig): PostDraft[] => {
     hashtags: [],
     isGeneratingImage: false,
     isGeneratingText: false,
-    mediaType: 'image'
+    mediaType: 'image',
+    scheduledTime: ''
   }));
 };
 
@@ -95,7 +96,7 @@ const AIStudioWorkflow = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <div className="h-full overflow-y-auto bg-gray-50 text-gray-800 font-sans custom-scrollbar">
       {currentStep === 'config' && (
         <WorkflowConfigModal onStart={handleStartWorkflow} />
       )}

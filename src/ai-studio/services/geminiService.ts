@@ -6,12 +6,14 @@ import type { WorkflowConfig, PostDraft, Platform } from "../types";
 export const generatePostContent = async (
     topic: string,
     platform: Platform,
+    businessContext: { name: string, description: string },
     media?: { data: string, mimeType: string }
 ) => {
     // Simulate API Delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     console.log(`[MOCK] Generating content for ${platform} on topic: "${topic}"`);
+    console.log(`[MOCK] Business: ${businessContext.name}`);
     if (media) console.log(`[MOCK] Analyzing media: ${media.mimeType}, size: ${media.data.length} chars`);
 
     // Mock Response
@@ -23,7 +25,7 @@ export const generatePostContent = async (
     };
 };
 
-export const generatePostPlan = async (config: WorkflowConfig): Promise<PostDraft[]> => {
+export const generatePostPlan = async (_config: WorkflowConfig): Promise<PostDraft[]> => {
     // Currently bypassed in App logic, but defined for completeness
     return [];
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PostDraft, Platform } from '../types';
+import { PostDraft, Platform, WorkflowConfig } from '../types';
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -34,6 +34,7 @@ import {
 interface Props {
   posts: PostDraft[];
   onReset: () => void;
+  config: WorkflowConfig;
 }
 
 interface LogEntry {
@@ -74,7 +75,7 @@ const formatNumber = (num: number) => {
     return num.toString();
 };
 
-const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
+const AgentSimulation: React.FC<Props> = ({ posts, onReset, config }) => {
   // --- STATE ---
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [conversations, setConversations] = useState<ChatThread[]>([]);
@@ -93,6 +94,14 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
   const distinctPlatforms = Array.from(new Set(posts.map(p => p.platform)));
   const [activePlatform, setActivePlatform] = useState<Platform>(distinctPlatforms[0] || 'Instagram');
   
+  // Derived Business Details
+  const businessHandle = config.businessName 
+    ? `@${config.businessName.toLowerCase().replace(/[^a-z0-9]/g, '_')}` 
+    : '@social_agent_ai';
+  const businessInitials = config.businessName 
+    ? config.businessName.substring(0, 2).toUpperCase() 
+    : 'AI';
+
   // Ensure active platform is valid
   useEffect(() => {
     if (!distinctPlatforms.includes(activePlatform) && distinctPlatforms.length > 0) {
@@ -595,7 +604,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                         {isTikTok && (
                                             <div className="relative mb-2">
                                                 <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-white overflow-hidden">
-                                                    <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-500 flex items-center justify-center text-[8px] font-bold">AI</div>
+                                                    <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-500 flex items-center justify-center text-[8px] font-bold">{businessInitials}</div>
                                                 </div>
                                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-500 rounded-full p-0.5">
                                                     <Plus className="w-3 h-3 text-white" />
@@ -652,7 +661,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                          {/* Sound (Youtube Only) */}
                                          {isYoutube && (
                                             <div className="mt-2 w-9 h-9 rounded-md bg-gray-800 border-2 border-white overflow-hidden">
-                                                 <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-500 flex items-center justify-center text-[6px] font-bold">AI</div>
+                                                 <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-500 flex items-center justify-center text-[6px] font-bold">{businessInitials}</div>
                                             </div>
                                         )}
                                     </div>
@@ -660,7 +669,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                     {/* Bottom Info Area */}
                                     <div className="absolute left-4 bottom-4 right-16 text-white z-10 text-left pb-16">
                                         <div className="font-bold text-md mb-2 drop-shadow-md flex items-center gap-2">
-                                            @social_agent_ai
+                                            {businessHandle}
                                             {isYoutube && <span className="text-[10px] bg-red-600 px-2 py-0.5 rounded-full font-bold">SUBSCRIBE</span>}
                                         </div>
                                         <div className="text-sm opacity-90 leading-tight drop-shadow-md mb-3 line-clamp-2">
@@ -669,7 +678,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                         <div className="text-xs font-bold flex items-center gap-2 mb-2">
                                             <Music2 className="w-3 h-3" /> 
                                             <div className="w-32 overflow-hidden whitespace-nowrap">
-                                                <span className="animate-marquee inline-block">Original Sound - Social Agent AI • Original Sound</span>
+                                                <span className="animate-marquee inline-block">Original Sound - {config.businessName} • Original Sound</span>
                                             </div>
                                         </div>
                                     </div>
@@ -685,10 +694,10 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-purple-600 p-[2px]">
                                     <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-[10px] font-bold">
-                                        AI
+                                        {businessInitials}
                                     </div>
                                     </div>
-                                    <span className="text-sm font-semibold">social_agent_ai</span>
+                                    <span className="text-sm font-semibold">{businessHandle.substring(1)}</span>
                                 </div>
                                 <MoreHorizontal className="w-5 h-5 text-gray-400" />
                             </div>
@@ -724,7 +733,7 @@ const AgentSimulation: React.FC<Props> = ({ posts, onReset }) => {
 
                             {/* Caption */}
                             <div className="px-3 text-sm">
-                                <span className="font-semibold mr-2">social_agent_ai</span>
+                                <span className="font-semibold mr-2">{businessHandle.substring(1)}</span>
                                 <span className="text-gray-100">{post.generatedCaption}</span>
                                 <div className="mt-1 text-blue-400">
                                     {post.hashtags.map((h, i) => (

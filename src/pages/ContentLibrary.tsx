@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAgentContext } from '../lib/AgentContext';
+import { generateBranchesForContent } from '../lib/utils';
 import { Film, Calendar, CheckCircle2, Clock, AlertCircle, Play, Eye, Heart, MessageCircle, Share2, Sparkles, GitBranch, X, ChevronRight, Inbox, Reply } from 'lucide-react';
 import type { PlannedPost, ContentBranch } from '../lib/types';
 
@@ -217,74 +218,7 @@ const ContentLibrary = () => {
         [state.tasks]
     );
 
-    // Generate branches for a content (variations for different platforms/styles)
-    const generateBranchesForContent = (task: any, metadata: any): ContentBranch[] => {
-        const baseContent = {
-            mediaUrl: metadata?.uploadedMedia || metadata?.imageUrl,
-            caption: task.description,
-            postType: (metadata?.mediaType === 'video' ? 'reel' : 'photo') as 'photo' | 'reel',
-        };
 
-        // Create original branch
-        const originalBranch: ContentBranch = {
-            id: `${task.id}-original`,
-            name: 'Original',
-            caption: baseContent.caption,
-            hashtags: ['#original', '#content'],
-            mediaUrl: baseContent.mediaUrl,
-            platform: metadata?.platform || 'instagram',
-            postType: baseContent.postType,
-            isSelected: true,
-            createdAt: Date.now(),
-        };
-
-        // Create platform variants
-        const platforms = ['instagram', 'tiktok', 'threads'];
-        const variantBranches: ContentBranch[] = platforms
-            .filter(p => p !== originalBranch.platform)
-            .map((platform, idx) => ({
-                id: `${task.id}-${platform}`,
-                parentId: originalBranch.id,
-                name: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Variant`,
-                caption: `${baseContent.caption} - Optimized for ${platform}`,
-                hashtags: [`#${platform}`, '#viral', '#trending'],
-                mediaUrl: baseContent.mediaUrl,
-                platform,
-                postType: baseContent.postType,
-                isSelected: false,
-                createdAt: Date.now() + idx * 1000,
-            }));
-
-        // Create editing style variants
-        const styleVariants: ContentBranch[] = [
-            {
-                id: `${task.id}-casual`,
-                parentId: originalBranch.id,
-                name: 'Casual Style',
-                caption: `${baseContent.caption} ✨ keeping it real`,
-                hashtags: ['#casual', '#authentic', '#vibes'],
-                mediaUrl: baseContent.mediaUrl,
-                platform: originalBranch.platform,
-                postType: baseContent.postType,
-                isSelected: false,
-                createdAt: Date.now() + 3000,
-            },
-            {
-                id: `${task.id}-professional`,
-                parentId: originalBranch.id,
-                name: 'Professional Style',
-                caption: `${baseContent.caption.split(':')[0]}: Professional insights and updates`,
-                hashtags: ['#professional', '#business', '#growth'],
-                mediaUrl: baseContent.mediaUrl,
-                platform: originalBranch.platform,
-                postType: baseContent.postType,
-                isSelected: false,
-                createdAt: Date.now() + 4000,
-            },
-        ];
-
-        return [originalBranch, ...variantBranches, ...styleVariants];
-    };
 
     // Handle content card click
     const handleContentClick = (taskId: string) => {
@@ -333,8 +267,8 @@ const ContentLibrary = () => {
                     <button
                         onClick={() => toggleBranchSelection(taskId, branch.id)}
                         className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${branch.isSelected
-                                ? 'bg-green-500 border-green-500'
-                                : 'border-gray-300 hover:border-green-400'
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-gray-300 hover:border-green-400'
                             }`}
                     >
                         {branch.isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
@@ -342,8 +276,8 @@ const ContentLibrary = () => {
 
                     {/* Branch Card */}
                     <div className={`flex-1 bg-white rounded-lg border-2 transition-all ${branch.isSelected
-                            ? 'border-green-400 shadow-md'
-                            : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-green-400 shadow-md'
+                        : 'border-gray-200 hover:border-gray-300'
                         }`}>
                         <div className="p-3">
                             <div className="flex items-start gap-3">

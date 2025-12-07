@@ -8,6 +8,8 @@ export interface WorkflowConfig {
     postCount: number;
     platforms: Platform[];
     contentSource: ContentSource;
+    businessName: string;
+    businessDescription: string;
     topic?: string;
     tone?: string;
 }

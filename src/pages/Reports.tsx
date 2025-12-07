@@ -246,11 +246,40 @@ const Reports = () => {
                         <MessageSquare className="w-4 h-4 text-indigo-600" />
                         <p className="text-sm font-semibold text-primary">Themes & takeaways</p>
                     </div>
-                    <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
-                        <li>Engagement skewed to {feedbackSummary.hotChannel?.platform || 'your top channel'}; consider cross-posting high performers.</li>
-                        <li>DM volume indicates appetite for collabs/resources—prep quick reply templates.</li>
-                        <li>Replies show interest in “how-to” and BTS angles; schedule more of these variants.</li>
-                    </ul>
+                    {(() => {
+                        const insights = [];
+
+                        if (feedbackSummary.hotChannel) {
+                            insights.push(`Engagement is highest on ${feedbackSummary.hotChannel.platform} (${feedbackSummary.hotChannel.comments + feedbackSummary.hotChannel.dms} interactions). Prioritize this channel.`);
+                        }
+
+                        if (feedbackSummary.dms > feedbackSummary.replies) {
+                            insights.push("High DM volume suggests users prefer private, 1:1 connection. Consider starting a newsletter or community.");
+                        } else if (feedbackSummary.replies > feedbackSummary.dms * 2 && feedbackSummary.replies > 5) {
+                            insights.push("Public discussion is active. Reply quickly to boost visibility further.");
+                        }
+
+                        if (feedbackSummary.hotChannel?.platform === 'tiktok' && feedbackSummary.replies < 5 && feedbackSummary.hotChannel.views > 1000) {
+                            insights.push("TikTok views are high but engagement is low. Try more 'Call to Actions' in videos.");
+                        }
+
+                        if (totals.views > 1000 && totals.likes < 50) {
+                            insights.push("Reach is good, but resonance is lower. Tweak hooks to be more specific.");
+                        }
+
+                        if (insights.length === 0) {
+                            insights.push("Publish more content to generate specific insights.");
+                            insights.push("Experiment with different content types to see what resonates.");
+                        }
+
+                        return (
+                            <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+                                {insights.map((insight, i) => (
+                                    <li key={i}>{insight}</li>
+                                ))}
+                            </ul>
+                        );
+                    })()}
                 </div>
             </div>
 
