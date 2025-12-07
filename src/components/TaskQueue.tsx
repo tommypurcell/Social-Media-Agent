@@ -6,6 +6,8 @@ interface TaskQueueProps {
 }
 
 export function TaskQueue({ tasks }: TaskQueueProps) {
+    const ordered = [...tasks].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
             <div className="p-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50/50">
@@ -17,12 +19,12 @@ export function TaskQueue({ tasks }: TaskQueueProps) {
             </div>
 
             <div className="overflow-y-auto p-4 space-y-3 flex-1">
-                {tasks.length === 0 && (
+                {ordered.length === 0 && (
                     <div className="text-center text-gray-400 py-8 text-sm">
                         No tasks in queue. Waiting for agent...
                     </div>
                 )}
-                {tasks.map((task) => (
+                {ordered.map((task) => (
                     <div
                         key={task.id}
                         className={`p-3 rounded-lg border text-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${task.status === 'in_progress'

@@ -21,7 +21,8 @@ const App: React.FC = () => {
       hashtags: [],
       isGeneratingImage: false,
       isGeneratingText: false,
-      mediaType: 'image'
+      mediaType: 'image',
+      scheduledTime: '10:00'
     }));
   };
 
@@ -51,7 +52,7 @@ const App: React.FC = () => {
                         id: nextId++,
                         platform: targetPlatform,
                         // Adapt type for video-centric platforms
-                        type: targetPlatform === 'Tiktok' ? 'Reel' : originalPost.type
+                        type: (targetPlatform === 'Tiktok' || targetPlatform === 'YouTube Shorts') ? 'Reel' : originalPost.type
                     });
                 }
             });

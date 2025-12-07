@@ -1,28 +1,17 @@
-import { useState } from 'react';
-import type { AgentState, WorkflowConfig } from '../lib/types';
+import type { AgentState } from '../lib/types';
 import { TaskQueue } from './TaskQueue';
 import { Feed } from './Feed';
 import { Inbox } from './Inbox';
 import { StatePanel } from './StatePanel';
-import { NewWorkflowModal } from './NewWorkflowModal';
-import { Play, Pause, Plus } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 
 interface DashboardProps {
     state: AgentState;
     onToggle: () => void;
     onGenerateSummary: () => void;
-    onStartWorkflow?: (config: WorkflowConfig) => void;
 }
 
-export function Dashboard({ state, onToggle, onGenerateSummary, onStartWorkflow }: DashboardProps) {
-    const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
-
-    const handleStartWorkflow = (config: WorkflowConfig) => {
-        if (onStartWorkflow) {
-            onStartWorkflow(config);
-        }
-    };
-
+export function Dashboard({ state, onToggle, onGenerateSummary }: DashboardProps) {
     return (
         <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
             {/* Header */}
@@ -41,14 +30,6 @@ export function Dashboard({ state, onToggle, onGenerateSummary, onStartWorkflow 
                 </div>
 
                 <div className="flex gap-3">
-                    <button
-                        onClick={() => setIsWorkflowModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium transition-all"
-                    >
-                        <Plus className="w-4 h-4" />
-                        New Workflow
-                    </button>
-
                     <button
                         onClick={onToggle}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all shadow-sm ${state.isActive
@@ -95,11 +76,6 @@ export function Dashboard({ state, onToggle, onGenerateSummary, onStartWorkflow 
             </main>
 
             {/* New Workflow Modal */}
-            <NewWorkflowModal
-                isOpen={isWorkflowModalOpen}
-                onClose={() => setIsWorkflowModalOpen(false)}
-                onStart={handleStartWorkflow}
-            />
         </div>
     );
 }

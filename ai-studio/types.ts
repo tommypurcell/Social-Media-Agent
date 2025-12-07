@@ -1,4 +1,4 @@
-export type Platform = 'Instagram' | 'Tiktok' | 'Threads';
+export type Platform = 'Instagram' | 'Tiktok' | 'Threads' | 'YouTube Shorts';
 export type WorkflowType = 'Plan Posts';
 export type ContentSource = 'AI Generated' | 'Upload';
 export type PostType = 'Photo Post' | 'Reel' | 'Carousel';
@@ -24,6 +24,7 @@ export interface PostDraft {
   uploadedFileMimeType?: string; // Mime type for AI API
   isGeneratingImage: boolean;
   isGeneratingText?: boolean;
+  scheduledTime: string;
 }
 
 export interface GenerationStatus {

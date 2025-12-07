@@ -4,6 +4,7 @@ import AgentChat from '../agent/AgentChat';
 import { FastCreationModal } from '../feed/FastCreationModal';
 import { NewWorkflowModal } from '../NewWorkflowModal';
 import { useAgentContext } from '../../lib/AgentContext';
+import { useLocation } from 'react-router-dom';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -13,6 +14,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const { startWorkflow } = useAgentContext();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isFastContentOpen, setIsFastContentOpen] = useState(false);
+    const location = useLocation();
+    const isMonitor = location.pathname.startsWith('/dashboard');
 
     return (
         <div className="flex h-screen w-full bg-background overflow-hidden text-primary font-sans">
@@ -31,14 +34,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <AgentChat />
             </aside>
 
-            <NewWorkflowModal
-                isOpen={isCreateOpen}
-                onClose={() => setIsCreateOpen(false)}
-                onStart={(config) => {
-                    startWorkflow(config);
-                    setIsCreateOpen(false);
-                }}
-            />
+            {!isMonitor && (
+                <NewWorkflowModal
+                    isOpen={isCreateOpen}
+                    onClose={() => setIsCreateOpen(false)}
+                    onStart={(config) => {
+                        startWorkflow(config);
+                        setIsCreateOpen(false);
+                    }}
+                />
+            )}
 
             <FastCreationModal
                 isOpen={isFastContentOpen}

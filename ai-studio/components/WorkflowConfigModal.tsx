@@ -72,12 +72,12 @@ const WorkflowConfigModal: React.FC<Props> = ({ onStart }) => {
           {/* Platforms */}
           <div>
             <h3 className="text-sm font-semibold text-gray-800 mb-2">Select platforms</h3>
-            <div className="flex gap-3">
-              {(['Instagram', 'Tiktok', 'Threads'] as Platform[]).map(p => (
+            <div className="flex gap-3 flex-wrap">
+              {(['Instagram', 'Tiktok', 'Threads', 'YouTube Shorts'] as Platform[]).map(p => (
                 <button
                   key={p}
                   onClick={() => togglePlatform(p)}
-                  className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${
+                  className={`flex-1 min-w-[120px] py-3 px-4 rounded-lg border font-medium transition-all ${
                     platforms.includes(p)
                       ? 'border-orange-500 text-orange-600 bg-orange-50 ring-1 ring-orange-500'
                       : 'border-gray-200 text-gray-600 hover:border-orange-300'

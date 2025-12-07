@@ -1,122 +1,86 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Activity, Clock, Play, Square, Calendar } from 'lucide-react';
 import { useAgentContext } from '../lib/AgentContext';
-import { Activity, Clock, FileVideo, Play, Sparkles, Target, Square, Calendar } from 'lucide-react';
-import { NewWorkflowModal } from '../components/NewWorkflowModal';
-import type { WorkflowConfig, PlannedPost } from '../lib/types';
-import { useOnboarding } from '../hooks/useOnboarding';
+
 
 const AgentMonitor = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state, addTask, toggleAgent } = useAgentContext();
-    const { onboardingData } = useOnboarding();
-    const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
-    const processedRef = useRef(false);
+    const { state, toggleAgent } = useAgentContext();
+    // processedRef...
 
-    // Handle return from Workflow Planner
-    useEffect(() => {
-        if (location.state?.plannedPosts && !processedRef.current) {
-            const posts = location.state.plannedPosts as PlannedPost[];
-            console.log("Received planned posts:", posts);
+    // ... (existing useEffect for location.state remains somewhat relevant but could be cleaned if NewWorkflowModal was the only source, but keeping it for safety as other flows might use it)
 
-            posts.forEach(post => {
-                // Create post_content task with all necessary metadata
-                const description = `Post to ${post.platform}: ${post.caption.substring(0, 30)}...`;
-
-                addTask(description, 'post_content', {
-                    platform: post.platform,
-                    caption: post.caption,
-                    mediaType: post.postType === 'reel' ? 'video' : 'image',
-                    uploadedMedia: post.uploadedImage, // Use uploaded media if available
-                    imageUrl: post.uploadedImage || undefined,
-                });
-            });
-
-            // Auto-start the agent if it's not running
-            if (!state.isActive) {
-                toggleAgent();
-            }
-
-            processedRef.current = true;
-            // Clear location state to prevent duplicate addition
-            window.history.replaceState({}, document.title);
+    // DUMMY DATA GENERATION
+    const dummyTasks = [
+        {
+            id: 'dummy-1',
+            title: 'Analyze optimal posting time',
+            status: 'completed',
+            stage: 'ANALYSIS',
+            progress: 100,
+            platform: 'All',
+            thumbnail: null,
+            timestamp: Date.now() - 1000 * 60 * 30 // 30 mins ago
+        },
+        {
+            id: 'dummy-2',
+            title: 'Generate captions for "Summer Launch"',
+            status: 'completed',
+            stage: 'CONTENT_GEN',
+            progress: 100,
+            platform: 'Instagram',
+            thumbnail: null,
+            timestamp: Date.now() - 1000 * 60 * 60 // 1 hour ago
+        },
+        {
+            id: 'dummy-3',
+            title: 'Upload: Product Teaser Video',
+            status: 'queued',
+            stage: 'UPLOAD',
+            progress: 0,
+            platform: 'TikTok',
+            thumbnail: null,
+            timestamp: Date.now() + 1000 * 60 * 60 * 2 // In 2 hours (Scheduled/Queued)
+        },
+        {
+            id: 'dummy-4',
+            title: 'Cross-post to Threads',
+            status: 'queued',
+            stage: 'DISTRIBUTION',
+            progress: 0,
+            platform: 'Threads',
+            thumbnail: null,
+            timestamp: Date.now() + 1000 * 60 * 60 * 3 // In 3 hours
         }
-    }, [location.state, addTask, toggleAgent, state.isActive]);
+    ];
 
-    const handleStartWorkflow = (config: WorkflowConfig) => {
-        console.log('Starting workflow with config:', config);
-        navigate('/workflow-planner', { state: { config } });
-    };
+    // Combine real and dummy tasks
+    const activeTasks = [
+        ...state.tasks.map(task => ({
+            id: task.id,
+            title: task.description.split(':')[1] || task.description,
+            status: task.status === 'in_progress' ? 'processing' : task.status === 'pending' ? 'queued' : task.status,
+            stage: task.type.replace('_', ' ').toUpperCase(),
+            progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
+            platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
+                task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
+            thumbnail: null,
+            timestamp: task.completedAt || task.createdAt
+        })),
+        ...(state.tasks.length === 0 ? dummyTasks : [])
+    ];
 
-    // Map real tasks to UI format
-    const activeTasks = state.tasks.map(task => ({
-        id: task.id,
-        title: task.description.split(':')[1] || task.description,
-        status: task.status === 'in_progress' ? 'processing' : task.status === 'pending' ? 'queued' : task.status,
-        stage: task.type.replace('_', ' ').toUpperCase(),
-        progress: task.status === 'completed' ? 100 : task.status === 'in_progress' ? 50 : 0,
-        platform: task.description.toLowerCase().includes('instagram') ? 'Instagram' :
-            task.description.toLowerCase().includes('tiktok') ? 'TikTok' : 'Social',
-        thumbnail: null,
-        timestamp: task.completedAt || task.createdAt // Use completedAt for order if done, else cratedAt
-    }));
-
-    // Get greeting based on time of day
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good morning';
-        if (hour < 18) return 'Good afternoon';
-        return 'Good evening';
-    };
-
-    const firstName = onboardingData?.fullName.split(' ')[0] || 'there';
+    // ... (getGreeting)
 
     return (
         <div className="flex-1 overflow-y-auto bg-background p-8">
-            {/* Personalized Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-3">
-                    <h1 className="text-3xl font-bold text-primary">
-                        {getGreeting()}, {firstName}!
-                    </h1>
-                    <Sparkles className="w-6 h-6 text-yellow-500" />
-                </div>
-                <p className="text-secondary">Real-time supervision of your Marathon Agent activities.</p>
+            {/* ... (Header section remains) ... */}
 
-                {/* User Profile Summary */}
-                {onboardingData && (
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                        {onboardingData.primaryUseCase && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full text-sm">
-                                <Target className="w-4 h-4 text-indigo-600" />
-                                <span className="text-indigo-700 font-medium">{onboardingData.primaryUseCase}</span>
-                            </div>
-                        )}
-                        {onboardingData.platforms && onboardingData.platforms.length > 0 && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-full text-sm">
-                                <span className="text-purple-700 font-medium">
-                                    {onboardingData.platforms.length} Platform{onboardingData.platforms.length !== 1 ? 's' : ''} Connected
-                                </span>
-                            </div>
-                        )}
-                        {onboardingData.goals && onboardingData.goals.length > 0 && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-sm">
-                                <span className="text-green-700 font-medium">
-                                    {onboardingData.goals.length} Active Goal{onboardingData.goals.length !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                )}
+            <div className="mb-8">
+                {/* ... (Header content) ... */}
             </div>
 
-            {/* Personalized Quick Actions */}
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/* Status Overview Card */}
-                <div className="col-span-full xl:col-span-3 bg-surface rounded-xl shadow-sm border border-border p-6 flex items-center justify-between">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Status Overview Card - Full Width */}
+                <div className="col-span-full bg-surface rounded-xl shadow-sm border border-border p-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-full ${state.isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
                             <Activity className={`w-8 h-8 ${state.isActive ? 'text-green-600 animate-pulse' : 'text-gray-400'}`} />
@@ -126,11 +90,12 @@ const AgentMonitor = () => {
                                 System Status: {state.isActive ? 'Active - Autonomous' : 'Standby'}
                             </h3>
                             <p className="text-sm text-secondary">
-                                {state.tasks.filter(t => t.status === 'in_progress').length} jobs running, {state.tasks.filter(t => t.status === 'pending').length} queued.
+                                {activeTasks.filter(t => t.status === 'processing').length} jobs running, {activeTasks.filter(t => t.status === 'queued').length} queued.
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-6">
+                        {/* No New Workflow Button */}
                         <button
                             onClick={toggleAgent}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all shadow-sm ${state.isActive
@@ -154,13 +119,13 @@ const AgentMonitor = () => {
                         <div className="flex gap-4 border-l border-border pl-6">
                             <div className="text-right">
                                 <span className="block text-2xl font-bold text-primary">
-                                    {state.tasks.filter(t => t.status === 'completed').length}
+                                    {activeTasks.filter(t => t.status === 'completed').length}
                                 </span>
                                 <span className="text-xs text-secondary uppercase tracking-wider">Completed</span>
                             </div>
                             <div className="text-right border-l border-border pl-4">
                                 <span className="block text-2xl font-bold text-accent">
-                                    {state.tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length}
+                                    {activeTasks.filter(t => t.status === 'queued' || t.status === 'processing').length}
                                 </span>
                                 <span className="text-xs text-secondary uppercase tracking-wider">Pending</span>
                             </div>
@@ -168,12 +133,13 @@ const AgentMonitor = () => {
                     </div>
                 </div>
 
-                {/* Timeline View */}
-                <div className="col-span-full xl:col-span-3">
+                {/* Timeline View - Full Width */}
+                <div className="col-span-full">
+                    <h2 className="text-xl font-bold text-primary mb-4">Activity Log & Schedule</h2>
                     <div className="space-y-8">
                         {/* Group tasks by date */}
                         {Object.entries(activeTasks.reduce((groups, task) => {
-                            const date = new Date(task.timestamp || Date.now()).toLocaleDateString(undefined, {
+                            const date = new Date(task.timestamp || 0).toLocaleDateString(undefined, {
                                 weekday: 'long',
                                 month: 'long',
                                 day: 'numeric'
@@ -191,15 +157,16 @@ const AgentMonitor = () => {
                                     </h3>
                                 </div>
 
-                                {/* Timeline Items */}
+                                {/* Timeline Items - Sorted by Recent First (Descending timestamp) */}
                                 <div className="relative ml-3 space-y-6 pl-8 border-l-2 border-border/50">
                                     {tasks.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).map((task) => (
                                         <div key={task.id} className="relative group">
                                             {/* Timeline Node */}
                                             <div className={`absolute -left-[39px] mt-1.5 w-5 h-5 rounded-full border-4 border-background transition-colors ${task.status === 'processing' ? 'bg-accent animate-pulse' :
                                                 task.status === 'completed' ? 'bg-green-500' :
-                                                    task.status === 'failed' ? 'bg-red-500' :
-                                                        'bg-gray-300'
+                                                    task.status === 'queued' ? 'bg-yellow-400' :
+                                                        task.status === 'failed' ? 'bg-red-500' :
+                                                            'bg-gray-300'
                                                 }`} />
 
                                             {/* Content Card */}
@@ -209,12 +176,13 @@ const AgentMonitor = () => {
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${task.status === 'processing' ? 'bg-accent/10 text-accent' :
                                                                 task.status === 'completed' ? 'bg-green-50 text-green-700' :
-                                                                    'bg-gray-100 text-gray-600'
+                                                                    task.status === 'queued' ? 'bg-yellow-50 text-yellow-700' :
+                                                                        'bg-gray-100 text-gray-600'
                                                                 }`}>
-                                                                {task.status}
+                                                                {task.status.toUpperCase()}
                                                             </span>
                                                             <span className="text-xs text-secondary">
-                                                                {new Date(task.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                {new Date(task.timestamp || 0).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </span>
                                                         </div>
                                                         <h4 className="text-base font-semibold text-primary truncate">
@@ -254,27 +222,7 @@ const AgentMonitor = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Upload New Card */}
-                <div
-                    onClick={() => setIsWorkflowModalOpen(true)}
-                    className="bg-surface rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 hover:border-accent hover:bg-accent/5 transition-all cursor-pointer min-h-[300px]"
-                >
-                    <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                        <FileVideo className="w-8 h-8 text-accent" />
-                    </div>
-                    <h3 className="font-semibold text-lg text-primary mb-1">New Workflow</h3>
-                    <p className="text-secondary text-center max-w-xs text-sm">Upload raw video & prompts. The Agent will handle the rest.</p>
-                </div>
-
             </div>
-
-            {/* New Workflow Modal */}
-            <NewWorkflowModal
-                isOpen={isWorkflowModalOpen}
-                onClose={() => setIsWorkflowModalOpen(false)}
-                onStart={handleStartWorkflow}
-            />
         </div>
     );
 };

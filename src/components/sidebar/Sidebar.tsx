@@ -44,13 +44,15 @@ const Sidebar = ({ onFastContentCreate }: SidebarProps) => {
                 <span className="ml-3 font-semibold text-lg hidden lg:block text-primary">Connectivity</span>
             </div>
 
-            <button
-                onClick={onFastContentCreate}
-                className="mb-6 w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-violet-700 transition-all duration-200 group"
-            >
-                <Zap className="w-5 h-5 text-yellow-300 fill-yellow-300" />
-                <span className="hidden lg:block font-medium">Fast Create</span>
-            </button>
+            {onFastContentCreate && (
+                <button
+                    onClick={onFastContentCreate}
+                    className="mb-6 w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg hover:from-indigo-700 hover:to-violet-700 transition-all duration-200 group"
+                >
+                    <Zap className="w-5 h-5 text-yellow-300 fill-yellow-300" />
+                    <span className="hidden lg:block font-medium">Fast Create</span>
+                </button>
+            )}
 
             <nav className="space-y-2 flex-1">
                 {navItems.map((item) => (
