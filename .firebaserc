@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "feedie-e5d5d"
-  }
+  },
+  "targets": {
+    "feedie-e5d5d": {
+      "hosting": {
+        "feedie": [
+          "feedie"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

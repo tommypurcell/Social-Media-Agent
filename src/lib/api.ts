@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Post, Message } from './types';
+import { database } from '../services/database';
 
 const client = axios.create({
     baseURL: 'http://localhost:3001/api',
@@ -46,7 +47,7 @@ export const api = {
         // Simulation
         if (Math.random() < 0.05) throw new Error("Instagram API Timeout");
 
-        return {
+        const post: Post = {
             id: Math.random().toString(36).substr(2, 9),
             content,
             image: imageUrl,
@@ -56,11 +57,15 @@ export const api = {
             timestamp: Date.now(),
             status: 'uploaded',
         };
+
+        // Save to Firestore
+        await database.savePost(post);
+        return post;
     },
 
     async postToThreads(content: string): Promise<Post> {
         await delay(1500);
-        return {
+        const post: Post = {
             id: Math.random().toString(36).substr(2, 9),
             content,
             platform: 'threads',
@@ -69,6 +74,10 @@ export const api = {
             timestamp: Date.now(),
             status: 'uploaded',
         };
+
+        // Save to Firestore
+        await database.savePost(post);
+        return post;
     },
 
     generateText: async (prompt: string): Promise<Post> => {
@@ -85,29 +94,23 @@ export const api = {
     },
 
     async fetchMessages(): Promise<Message[]> {
-        await delay(1000);
-        // Simulate receiving new messages occasionally
-        // In future, call client.get('/agent/messages')
-        if (Math.random() > 0.8) {
-            return [{
-                id: Math.random().toString(36).substr(2, 9),
-                sender: `user_${Math.floor(Math.random() * 1000)}`,
-                content: "Hey, love your content! Collab?",
-                isFromAgent: false,
-                timestamp: Date.now()
-            }];
-        }
+        // Fetch real messages from Firestore
+        const messages = await database.getMessages();
+        if (messages.length > 0) return messages;
+
+        // Fallback or empty if no real messages yet
         return [];
     },
 
     async sendMessage(_to: string, content: string): Promise<Message> {
-        await delay(1000);
-        return {
+        const message: Message = {
             id: Math.random().toString(36).substr(2, 9),
             sender: 'agent',
             content,
             isFromAgent: true,
             timestamp: Date.now()
         };
+        await database.saveMessage(message);
+        return message;
     }
 };

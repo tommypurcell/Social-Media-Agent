@@ -1,5 +1,6 @@
 {
     "hosting": {
+        "target": "feedie",
         "public": "dist",
         "ignore": [
             "firebase.json",
