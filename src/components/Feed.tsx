@@ -62,7 +62,7 @@ const FeedPost = ({ post, onSelect, toggleComments, isCommentsExpanded }: {
                         {post.mediaType === 'video' ? <Video className="w-4 h-4 text-white" /> : <Instagram className="w-4 h-4 text-white" />}
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-gray-900 leading-tight">marathon_agent</h3>
+                        <h3 className="text-sm font-bold text-gray-900 leading-tight">feedie</h3>
                         <div className="flex items-center gap-1.5">
                             <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">{post.platform}</span>
                             <span className="text-[10px] text-gray-300">•</span>
@@ -141,7 +141,7 @@ const FeedPost = ({ post, onSelect, toggleComments, isCommentsExpanded }: {
 
                 <div className="space-y-1 mb-3">
                     <p className="text-sm text-gray-800 line-clamp-2 leading-relaxed">
-                        <span className="font-bold mr-2">marathon_agent</span>
+                        <span className="font-bold mr-2">feedie</span>
                         {post.content}
                     </p>
                 </div>

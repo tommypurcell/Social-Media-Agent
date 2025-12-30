@@ -41,10 +41,10 @@ const Login = () => {
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl shadow-indigo-200 mb-4">
-            <span className="text-white font-bold text-2xl">M</span>
+            <span className="text-white font-bold text-2xl">F</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your Marathon Agent account</p>
+          <p className="text-gray-600">Sign in to your Feedie account</p>
         </div>
 
         {/* Login Form */}

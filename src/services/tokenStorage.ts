@@ -18,7 +18,7 @@ export interface StoredTokens {
 const STORAGE_KEY = 'social_media_tokens';
 
 class TokenStorage {
-  // private encryptionKey = 'marathon-agent-v1'; // In production, use proper encryption
+  // private encryptionKey = 'feedie-v1'; // In production, use proper encryption
 
   // Store tokens for a platform
   setTokens(platform: keyof StoredTokens, tokens: PlatformTokens): void {

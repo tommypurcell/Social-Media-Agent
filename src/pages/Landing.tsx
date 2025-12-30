@@ -28,7 +28,7 @@ const Landing = () => {
                             <Zap className="w-5 h-5 fill-current" />
                         </div>
                         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                            Connectivity
+                            Feedie
                         </span>
                     </div>
                     <div className="flex items-center gap-6">
@@ -59,7 +59,7 @@ const Landing = () => {
 
                 <div className="max-w-7xl mx-auto px-6 relative">
                     {/* Video Marquee Container - Positioned as a dynamic background layer */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[75%] h-[900px] hidden xl:block overflow-hidden pointer-events-none z-0 opacity-90 [mask-image:linear-gradient(to_right,transparent_0%,black_15%)]">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[75%] h-[900px] hidden lg:block overflow-hidden pointer-events-none z-0 opacity-90 [mask-image:linear-gradient(to_right,transparent_0%,black_15%)]">
                         <div className="rotate-y-12 transform-3d scale-110">
                             <VideoMarquee />
                         </div>
@@ -77,7 +77,7 @@ const Landing = () => {
                             </span>
                         </h1>
                         <p className="text-lg text-slate-800 mb-8 leading-relaxed font-medium">
-                            Connectivity is your autonomous AI marketing agent. Plan, create, and optimize your social media presence across platforms with zero friction.
+                            Feedie is your autonomous AI marketing agent. Plan, create, and optimize your social media presence across platforms with zero friction.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -112,7 +112,7 @@ const Landing = () => {
                         </div>
                     </div>
                 </div>
-            </header>
+            </header >
 
             {/* Features Metrics */}
             <section className="py-12 border-y border-slate-100 bg-white/60 backdrop-blur-sm relative z-10">
@@ -129,14 +129,14 @@ const Landing = () => {
                         </div>
                     ))}
                 </div>
-            </section>
+            </section >
 
             {/* Use Cases Section */}
             <section className="py-24 bg-slate-50">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center max-w-2xl mx-auto mb-16">
                         <h2 className="text-3xl font-bold text-slate-900 mb-4">Built for every creator</h2>
-                        <p className="text-lg text-slate-600">Whether you're a solo creator or a scaling agency, Connectivity adapts to your workflow.</p>
+                        <p className="text-lg text-slate-600">Whether you're a solo creator or a scaling agency, Feedie adapts to your workflow.</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
                         <UseCaseCard
@@ -159,7 +159,7 @@ const Landing = () => {
                         />
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Main Features Grid - DARK THEME */}
             <section id="features" className="py-24 bg-slate-900 text-white relative overflow-hidden">
@@ -168,7 +168,7 @@ const Landing = () => {
                     <div className="text-center max-w-2xl mx-auto mb-20">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything you need to scale</h2>
                         <p className="text-lg text-slate-400">
-                            Stop wrestling with complex tools. Connectivity integrates every step of your workflow into one seamless AI-driven experience.
+                            Stop wrestling with complex tools. Feedie integrates every step of your workflow into one seamless AI-driven experience.
                         </p>
                     </div>
 
@@ -211,12 +211,12 @@ const Landing = () => {
                         />
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Testimonials Section - COLORFUL THEME */}
             <section className="py-24 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-white relative overflow-hidden">
                 {/* Background Pattern */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light"></div>
+                < div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-soft-light" ></div >
                 <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -227,7 +227,7 @@ const Landing = () => {
 
                     <div className="grid md:grid-cols-3 gap-6">
                         <TestimonialCard
-                            quote="Connectivity has completely transformed how I manage my brand. I save at least 15 hours a week."
+                            quote="Feedie has completely transformed how I manage my brand. I save at least 15 hours a week."
                             author="Sarah Jenkins"
                             role="Lifestyle Creator"
                             image="https://i.pravatar.cc/100?img=5"
@@ -249,7 +249,7 @@ const Landing = () => {
                         />
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Preview Section - LIGHT THEME */}
             <section className="py-24 bg-white overflow-hidden relative border-t border-slate-100">
@@ -294,17 +294,17 @@ const Landing = () => {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Footer - DARK THEME */}
             <footer className="bg-slate-950 py-12 border-t border-slate-800 text-slate-400">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded bg-white flex items-center justify-center text-slate-950 text-xs font-bold">C</div>
-                        <span className="font-semibold text-white">Connectivity</span>
+                        <span className="font-semibold text-white">Feedie</span>
                     </div>
                     <div className="text-sm">
-                        © 2024 Connectivity Inc. All rights reserved.
+                        © 2024 Feedie Inc. All rights reserved.
                     </div>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-white transition-colors">Twitter</a>
@@ -315,13 +315,15 @@ const Landing = () => {
             </footer>
 
             {/* Onboarding Modal Overlay */}
-            {showOnboarding && (
-                <OnboardingModal
-                    onComplete={handleOnboardingComplete}
-                    onClose={() => setShowOnboarding(false)}
-                />
-            )}
-        </div>
+            {
+                showOnboarding && (
+                    <OnboardingModal
+                        onComplete={handleOnboardingComplete}
+                        onClose={() => setShowOnboarding(false)}
+                    />
+                )
+            }
+        </div >
     );
 };
 

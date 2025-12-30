@@ -41,7 +41,7 @@ const Sidebar = ({ onFastContentCreate }: SidebarProps) => {
                 <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl shadow-md">
                     C
                 </div>
-                <span className="ml-3 font-semibold text-lg hidden lg:block text-primary">Connectivity</span>
+                <span className="ml-3 font-semibold text-lg hidden lg:block text-primary">Feedie</span>
             </div>
 
             {onFastContentCreate && (

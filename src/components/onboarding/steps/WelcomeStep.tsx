@@ -8,14 +8,14 @@ const WelcomeStep = () => {
         <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative w-24 h-24 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl flex items-center justify-center shadow-2xl">
-            <span className="text-white font-bold text-5xl tracking-tighter">C</span>
+            <span className="text-white font-bold text-5xl tracking-tighter">F</span>
           </div>
         </div>
       </div>
 
       <div>
         <h3 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
-          Welcome to Connectivity
+          Welcome to Feedie
         </h3>
         <p className="text-lg text-slate-600 max-w-lg mx-auto leading-relaxed">
           Your autonomous AI marketing agent is ready to scale your presence using data-driven strategies.

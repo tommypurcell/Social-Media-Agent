@@ -58,11 +58,11 @@ const VideoCard = ({ video }: { video: typeof videos[0] }) => (
                 </div>
             </div>
             <p className="text-sm font-semibold leading-tight drop-shadow-lg line-clamp-2 text-white/95">
-                Viral {video.category.toLowerCase()} content generated in seconds. <span className="font-bold text-indigo-300">#AI</span> <span className="font-bold text-indigo-300">#Connectivity</span>
+                Viral {video.category.toLowerCase()} content generated in seconds. <span className="font-bold text-indigo-300">#AI</span> <span className="font-bold text-indigo-300">#Feedie</span>
             </p>
             <div className="flex items-center gap-2 mt-3 opacity-90">
                 <Music2 className="w-3 h-3 text-indigo-300" />
-                <span className="text-xs font-medium">Original Sound - Connectivity AI</span>
+                <span className="text-xs font-medium">Original Sound - Feedie AI</span>
             </div>
         </div>
 

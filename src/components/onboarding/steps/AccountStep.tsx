@@ -103,7 +103,7 @@ const AccountStep = ({ formData, updateFormData }: AccountStepProps) => {
       <div className="mt-8 p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
         <p className="text-sm text-indigo-900/80 leading-relaxed">
           <span className="font-semibold block mb-1">🔒 Privacy First</span>
-          Your information is stored locally and securely. We use it only to personalize your Connectivity experience.
+          Your information is stored locally and securely. We use it only to personalize your Feedie experience.
         </p>
       </div>
     </div>

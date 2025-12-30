@@ -15,7 +15,7 @@ const INITIAL_STATE: AgentState = {
         {
             id: 'init_1',
             role: 'agent',
-            content: 'Hello! I am your AI Social Media Agent. How can I help you today?',
+            content: 'Hello! I am Feedie. How can I help you today?',
             timestamp: Date.now()
         }
     ]
