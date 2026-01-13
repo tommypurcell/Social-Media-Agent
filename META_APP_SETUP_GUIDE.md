@@ -4,7 +4,7 @@ Follow these **exact** steps to configure your Meta app for Instagram and Thread
 
 ## ✅ Current Status
 - **App ID**: 1872089233443572
-- **App Name**: connectivity
+- **App Name**: Feedie
 - **Credentials**: Already configured in `.env` ✅
 
 ---
